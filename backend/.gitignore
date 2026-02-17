@@ -1,0 +1,30 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Build directory (The "Translated" code)
+dist/
+build/
+out/
+
+# Environment variables (Sensitive Secrets!)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# TypeScript specific
+tsconfig.tsbuildinfo
+/src/generated/prisma
