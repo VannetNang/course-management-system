@@ -13,7 +13,7 @@ export const validateRequest = (schema: any) => {
         .map((err: any) => err._errors)
         .flat();
 
-      return res.status(400).json({ message: flatErrors });
+      return res.status(400).json({ status: 'error', message: flatErrors });
     }
 
     next();
