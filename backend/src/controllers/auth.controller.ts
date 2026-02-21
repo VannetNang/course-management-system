@@ -1,11 +1,15 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { prisma } from '../config/db';
 import bcrypt from 'bcrypt';
 import { generateToken } from '../utils/generateToken';
 
 // @desc    create account
 // @Route   POST   /api/auth/register
-export const register = async (req: Request, res: Response) => {
+export const register = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { name, email, password } = req.body;
 
@@ -19,7 +23,7 @@ export const register = async (req: Request, res: Response) => {
     if (existingUser) {
       return res.status(400).json({
         status: 'error',
-        error: 'User already exists with this email',
+        message: 'User already exists with this email',
       });
     }
 
@@ -49,31 +53,60 @@ export const register = async (req: Request, res: Response) => {
           id: newUser.id,
           name: newUser.name,
           email: newUser.email,
+          role: newUser.role,
         },
         token,
       },
     });
   } catch (error) {
-    const err =
-      error instanceof Error ? error.message : 'Internal Server Error';
-    console.error(err);
-    res.status(500).json({
-      message: err,
-    });
+    next(error);
   }
 };
 
 // @desc    login account
 // @Route   POST   /api/auth/login
-export const login = async (req: Request, res: Response) => {
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
-    res.json({ message: 'Success' });
-  } catch (error) {
-    const err =
-      error instanceof Error ? error.message : 'Internal Server Error';
-    console.error(err);
-    res.status(500).json({
-      message: err,
+    const { email, password } = req.body;
+
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
     });
+
+    // Check if user exists AND if the password matches
+    if (
+      !existingUser ||
+      !(await bcrypt.compare(password, existingUser.password))
+    ) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Incorrect credential information',
+      });
+    }
+
+    // Assign JWT Token
+    const token = generateToken(existingUser.id, res);
+
+    res.json({
+      status: 'success',
+      message: 'Logged in successfully',
+      data: {
+        user: {
+          id: existingUser.id,
+          name: existingUser.name,
+          email: existingUser.email,
+          role: existingUser.role,
+        },
+        token,
+      },
+    });
+  } catch (error) {
+    next(error);
   }
 };
