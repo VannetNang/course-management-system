@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { prisma } from '../config/db.js';
+import { prisma } from '../config/db';
 import config from '../config/config';
 import jwt from 'jsonwebtoken';
 
