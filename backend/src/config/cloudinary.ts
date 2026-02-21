@@ -4,9 +4,9 @@ import { Request } from 'express';
 import config from './config';
 import multer from 'multer';
 
-export const connectToCloudinary = () => {
+export const connectToCloudinary = async () => {
   try {
-    cloudinary.config({
+    await cloudinary.config({
       cloud_name: config.cloudinary_name,
       api_key: config.cloudinary_key,
       api_secret: config.cloudinary_secret,

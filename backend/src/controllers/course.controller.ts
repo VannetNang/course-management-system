@@ -43,7 +43,7 @@ export const show = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-// @desc    create new courses   (AUTH)
+// @desc    create new courses   (ADMIN ONLY)
 // @Route   POST   /api/courses
 export const store = async (
   req: Request,
