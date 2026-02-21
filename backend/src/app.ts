@@ -1,8 +1,9 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import authRouter from './routes/auth.route';
 import { connectDB } from './config/db';
 import errorMiddleware from './middleware/error.middleware';
 import cookieParser from 'cookie-parser';
+import courseRouter from './routes/course.route';
 
 const app = express();
 connectDB();
@@ -11,12 +12,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
   res.json({ message: 'Welcome to CMS Backend API!' });
 });
 
 // Routes
 app.use('/api/auth', authRouter);
+app.use('/api/courses', courseRouter);
 
 // Global error handler (should be after routes)
 app.use(errorMiddleware);
