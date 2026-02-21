@@ -93,7 +93,7 @@ export const login = async (
     // Assign JWT Token
     const token = generateToken(existingUser.id, res);
 
-    res.json({
+    res.status(200).json({
       status: 'success',
       message: 'Logged in successfully',
       data: {
@@ -105,6 +105,31 @@ export const login = async (
         },
         token,
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    login account
+// @Route   POST   /api/auth/logout
+export const logout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    res.cookie('jwt', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Only sends over HTTPS in production
+      sameSite: 'strict', // Protects against CSRF attacks
+      path: '/', // Ensure it clears for the whole domain
+      expires: new Date(0), // Set the cookie to expire
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Logged out successfully',
     });
   } catch (error) {
     next(error);
