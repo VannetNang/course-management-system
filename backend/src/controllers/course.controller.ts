@@ -148,7 +148,7 @@ export const update = async (
 };
 
 // @desc    delete courses   (ADMIN ONLY)
-// @Route   DEL   /api/courses/:id
+// @Route   DELETE   /api/courses/:id
 export const destroy = async (
   req: Request,
   res: Response,
