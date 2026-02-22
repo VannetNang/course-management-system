@@ -38,7 +38,7 @@ courseRouter.put(
   '/:id',
   userAuthorize,
   adminOnly,
-  upload.single('thumbnail'),
+  upload.single('thumbnail'), // must be exact to the Course Schema
   validateRequest(updateCourseSchema),
   update,
 );

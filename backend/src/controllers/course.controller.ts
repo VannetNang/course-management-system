@@ -1,6 +1,6 @@
-import e, { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db';
-import { string } from 'zod';
+import { cloudinary } from '../config/cloudinary';
 
 // @desc    get all courses   (PUBLIC)
 // @Route   GET   /api/courses
@@ -10,7 +10,10 @@ export const index = async (
   next: NextFunction,
 ) => {
   try {
-    const courses = await prisma.course.findMany();
+    const courses = await prisma.course.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: { lessons: true },
+    });
 
     res.status(200).json({
       status: 'success',
@@ -32,6 +35,7 @@ export const show = async (req: Request, res: Response, next: NextFunction) => {
       where: {
         id: id as string,
       },
+      include: { lessons: true },
     });
 
     res.status(200).json({
@@ -151,6 +155,43 @@ export const destroy = async (
   next: NextFunction,
 ) => {
   try {
+    const { id } = req.params as { id: string };
+
+    // find existing course
+    const existingCourse = await prisma.course.findUnique({
+      where: { id: id },
+    });
+
+    // if not found
+    if (!existingCourse) {
+      return res
+        .status(404)
+        .json({ status: 'error', message: 'Course not found' });
+    }
+
+    // Delete from Cloudinary (if a thumbnail exists)
+    if (existingCourse.thumbnail) {
+      try {
+        // Extract public_id: "folder/image_name" from the full URL
+        const publicId = existingCourse.thumbnail
+          .split('/')
+          .slice(-2)
+          .join('/')
+          .split('.')[0];
+        await cloudinary.uploader.destroy(publicId);
+      } catch (cloudinaryError) {
+        console.error('Cloudinary delete failed:', cloudinaryError);
+        // We continue anyway so the DB record actually gets deleted
+      }
+    }
+
+    // Cause 'onDelete: Cascade', this automatically deletes all associated lessons!
+    await prisma.course.delete({
+      where: {
+        id: id,
+      },
+    });
+
     res.status(200).json({
       status: 'success',
       message: 'Deleted course successfully',
