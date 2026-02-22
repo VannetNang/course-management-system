@@ -10,7 +10,10 @@ import { userAuthorize } from '../middleware/auth.middleware';
 import { adminOnly } from '../middleware/role.middleware';
 import { upload } from '../config/cloudinary';
 import { validateRequest } from '../middleware/validation.middleware';
-import { createCourseSchema } from '../schemas/course.schema';
+import {
+  createCourseSchema,
+  updateCourseSchema,
+} from '../schemas/course.schema';
 
 const courseRouter = Router();
 
@@ -31,7 +34,14 @@ courseRouter.post(
 );
 
 // Update specific course + Admin only
-courseRouter.put('/:id', userAuthorize, adminOnly, update);
+courseRouter.put(
+  '/:id',
+  userAuthorize,
+  adminOnly,
+  upload.single('thumbnail'),
+  validateRequest(updateCourseSchema),
+  update,
+);
 
 // Delete specific course + Admin only
 courseRouter.delete('/:id', userAuthorize, adminOnly, destroy);

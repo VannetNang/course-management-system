@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import e, { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db';
 import { string } from 'zod';
 
@@ -98,9 +98,45 @@ export const update = async (
   next: NextFunction,
 ) => {
   try {
-    res.status(201).json({
+    const { id } = req.params as { id: string };
+
+    // find existing course
+    const existingCourse = await prisma.course.findUnique({
+      where: { id: id },
+    });
+
+    // if not found
+    if (!existingCourse) {
+      return res
+        .status(404)
+        .json({ status: 'error', message: 'Course not found' });
+    }
+
+    // then, extract data
+    const { title, description, price, discount, discountQuantity, lessons } =
+      req.body;
+
+    // if no file, keep the old one
+    const thumbnail = req.file?.path;
+
+    const updatedCourse = await prisma.course.update({
+      where: { id: id },
+      data: {
+        title: title || undefined, // If title is empty, Prisma won't touch the current title
+        description: description || undefined,
+        price: price ? parseFloat(price) : undefined,
+        discount: discount ? parseFloat(discount) : undefined,
+        discountQuantity: discountQuantity
+          ? parseInt(discountQuantity)
+          : undefined,
+        thumbnail: thumbnail || undefined,
+      },
+    });
+
+    res.status(200).json({
       status: 'success',
       message: 'Updated course successfully',
+      data: updatedCourse,
     });
   } catch (error) {
     next(error);
