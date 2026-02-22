@@ -5,13 +5,10 @@ export const validateRequest = (schema: any) => {
     const validated = schema.safeParse(req.body);
 
     if (!validated.success) {
-      const formatted = validated.error.format();
+      const fieldErrors = validated.error.flatten().fieldErrors;
 
-      const flatErrors = Object.values(formatted)
-        .flat()
-        .filter(Boolean)
-        .map((err: any) => err._errors)
-        .flat();
+      // Convert that object into a single flat array of strings
+      const flatErrors = Object.values(fieldErrors).flat();
 
       return res.status(400).json({ status: 'error', message: flatErrors });
     }

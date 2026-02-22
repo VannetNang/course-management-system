@@ -9,6 +9,8 @@ import {
 import { userAuthorize } from '../middleware/auth.middleware';
 import { adminOnly } from '../middleware/role.middleware';
 import { upload } from '../config/cloudinary';
+import { validateRequest } from '../middleware/validation.middleware';
+import { createCourseSchema } from '../schemas/course.schema';
 
 const courseRouter = Router();
 
@@ -24,6 +26,7 @@ courseRouter.post(
   userAuthorize,
   adminOnly,
   upload.single('thumbnail'), // must be exact to the Course Schema
+  validateRequest(createCourseSchema),
   store,
 );
 
