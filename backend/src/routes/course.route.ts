@@ -31,7 +31,13 @@ courseRouter.post(
 );
 
 // Update specific course + Admin only
-courseRouter.put('/:id', userAuthorize, adminOnly, update);
+courseRouter.put(
+  '/:id',
+  userAuthorize,
+  adminOnly,
+  upload.single('thumbnail'),
+  update,
+);
 
 // Delete specific course + Admin only
 courseRouter.delete('/:id', userAuthorize, adminOnly, destroy);
