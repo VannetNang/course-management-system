@@ -8,6 +8,7 @@ import {
 } from '../controllers/course.controller';
 import { userAuthorize } from '../middleware/auth.middleware';
 import { adminOnly } from '../middleware/role.middleware';
+import { upload } from '../config/cloudinary';
 
 const courseRouter = Router();
 
@@ -18,7 +19,13 @@ courseRouter.get('/', index);
 courseRouter.get('/:id', show);
 
 // Create new course + Admin only
-courseRouter.post('/', userAuthorize, adminOnly, store);
+courseRouter.post(
+  '/',
+  userAuthorize,
+  adminOnly,
+  upload.single('thumbnail'), // must be exact to the Course Schema
+  store,
+);
 
 // Update specific course + Admin only
 courseRouter.put('/:id', userAuthorize, adminOnly, update);

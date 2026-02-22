@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db';
+import { string } from 'zod';
 
 // @desc    get all courses   (PUBLIC)
 // @Route   GET   /api/courses
@@ -51,9 +52,38 @@ export const store = async (
   next: NextFunction,
 ) => {
   try {
+    const { title, description, price, discount, discountQuantity, lessons } =
+      req.body;
+    const thumbnail = req.file?.path;
+
+    // Convert from stringify / text lessons back to array using Parse()
+    let parsedLessons = [];
+    if (lessons) {
+      parsedLessons = JSON.parse(lessons);
+    }
+
+    // Create new course
+    const newCourse = await prisma.course.create({
+      data: {
+        title,
+        description,
+        price: parseFloat(price),
+        thumbnail: thumbnail as string,
+        discount: parseFloat(discount || '0'),
+        discountQuantity: parseInt(discountQuantity || '0'),
+        lessons: {
+          create: parsedLessons,
+        },
+      },
+      include: {
+        lessons: true,
+      },
+    });
+
     res.status(201).json({
       status: 'success',
       message: 'Uploaded course successfully',
+      data: newCourse,
     });
   } catch (error) {
     next(error);
