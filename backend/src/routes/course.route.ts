@@ -10,7 +10,10 @@ import { userAuthorize } from '../middleware/auth.middleware';
 import { adminOnly } from '../middleware/role.middleware';
 import { upload } from '../config/cloudinary';
 import { validateRequest } from '../middleware/validation.middleware';
-import { createCourseSchema } from '../schemas/course.schema';
+import {
+  createCourseSchema,
+  updateCourseSchema,
+} from '../schemas/course.schema';
 
 const courseRouter = Router();
 
@@ -36,6 +39,7 @@ courseRouter.put(
   userAuthorize,
   adminOnly,
   upload.single('thumbnail'),
+  validateRequest(updateCourseSchema),
   update,
 );
 
