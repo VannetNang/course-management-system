@@ -8,6 +8,9 @@ interface Config {
   database_url: string;
   jwt_secret: string;
   jwt_expire: string;
+  cloudinary_name: string;
+  cloudinary_key: string;
+  cloudinary_secret: string;
 }
 
 const config: Config = {
@@ -16,6 +19,9 @@ const config: Config = {
   database_url: process.env.DATABASE_URL || '',
   jwt_secret: process.env.JWT_SECRET || '',
   jwt_expire: process.env.JWT_EXPIRES_IN || '3d',
+  cloudinary_name: process.env.CLOUDINARY_NAME || '',
+  cloudinary_key: process.env.CLOUDINARY_API_KEY || '',
+  cloudinary_secret: process.env.CLOUDINARY_API_SECRET || '',
 };
 
 export default config;

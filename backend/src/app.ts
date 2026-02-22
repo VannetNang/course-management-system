@@ -4,14 +4,20 @@ import { connectDB } from './config/db';
 import errorMiddleware from './middleware/error.middleware';
 import cookieParser from 'cookie-parser';
 import courseRouter from './routes/course.route';
+import { connectToCloudinary } from './config/cloudinary';
 
 const app = express();
-connectDB();
 
+// Third-party connection
+connectDB();
+connectToCloudinary();
+
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Default route
 app.get('/', (req: Request, res: Response) => {
   res.json({ message: 'Welcome to CMS Backend API!' });
 });
