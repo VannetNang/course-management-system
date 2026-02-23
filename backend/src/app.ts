@@ -4,6 +4,7 @@ import { connectDB } from './config/db';
 import errorMiddleware from './middleware/error.middleware';
 import cookieParser from 'cookie-parser';
 import courseRouter from './routes/course.route';
+import lessonRouter from './routes/lesson.route';
 import { connectToCloudinary } from './config/cloudinary';
 
 const app = express();
@@ -25,6 +26,7 @@ app.get('/', (req: Request, res: Response) => {
 // Routes
 app.use('/api/auth', authRouter);
 app.use('/api/courses', courseRouter);
+app.use('/api/lessons', lessonRouter);
 
 // Global error handler (should be after routes)
 app.use(errorMiddleware);
