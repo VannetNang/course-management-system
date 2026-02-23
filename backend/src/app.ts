@@ -1,11 +1,12 @@
 import express, { Request, Response } from 'express';
-import authRouter from './routes/auth.route';
+import { connectToCloudinary } from './config/cloudinary';
 import { connectDB } from './config/db';
 import errorMiddleware from './middleware/error.middleware';
 import cookieParser from 'cookie-parser';
+import authRouter from './routes/auth.route';
 import courseRouter from './routes/course.route';
 import lessonRouter from './routes/lesson.route';
-import { connectToCloudinary } from './config/cloudinary';
+import enrolmentRouter from './routes/enrolment.route';
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/api/auth', authRouter);
 app.use('/api/courses', courseRouter);
 app.use('/api/lessons', lessonRouter);
+app.use('/api/enrolments', enrolmentRouter);
 
 // Global error handler (should be after routes)
 app.use(errorMiddleware);
