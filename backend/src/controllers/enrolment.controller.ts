@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db';
 import { COUNTRY, CURRENCY, KHQR, TAG } from 'ts-khqr';
 import config from '../config/config';
+import { RequestWithUser } from '../middleware/auth.middleware';
+import { verifyBakongTransaction } from '../utils/verifyBakongTransaction';
 
 // @desc    show course's price summary   (PUBLIC)
 // @Route   GET   /api/enrolments/summary/:id
@@ -60,7 +62,7 @@ export const getSummary = async (
 // @desc    show QR CODE   (AUTH ONLY)
 // @Route   GET   /api/enrolments/checkout/:id
 export const createTransaction = async (
-  req: Request,
+  req: RequestWithUser,
   res: Response,
   next: NextFunction,
 ) => {
@@ -96,9 +98,18 @@ export const createTransaction = async (
       },
     });
 
+    await prisma.enrolment.create({
+      data: {
+        userId: req.user.id,
+        courseId: course.id,
+        priceAtSale: Number(course.price),
+        progress: 0,
+      },
+    });
+
     res.status(200).json({
       status: 'success',
-      message: 'Course summary retrieved successfully',
+      message: 'Transaction created and QR generated',
       data: {
         qr: result.data?.qr,
         md5: result.data?.md5,
@@ -117,9 +128,43 @@ export const modifyTransaction = async (
   next: NextFunction,
 ) => {
   try {
+    const { md5, enrolmentId } = req.body;
+
+    // Check existing enrolment
+    const enrolment = await prisma.enrolment.findUnique({
+      where: { id: enrolmentId },
+    });
+
+    // If not found
+    if (!enrolment) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Enrolment not found',
+      });
+    }
+
+    // Else, check the transaction
+    const result = await verifyBakongTransaction(md5);
+
+    // If not success
+    if (result.data.responseCode !== 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Payment failed! Transaction not yet received',
+      });
+    }
+
+    // If success -> update the status
+    await prisma.enrolment.update({
+      where: { id: enrolmentId },
+      data: {
+        status: 'success',
+      },
+    });
+
     res.status(200).json({
       status: 'success',
-      message: 'Course summary retrieved successfully',
+      message: 'Payment verified successfully',
     });
   } catch (error) {
     next(error);

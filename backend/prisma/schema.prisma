@@ -51,7 +51,7 @@ model Enrolment {
   userId String
   courseId String
   priceAtSale Decimal @db.Decimal(10, 2)
-  status EnrolmentStatus @default(pending)
+  status EnrolmentStatus @default(pending)  
   progress Decimal @db.Decimal(10, 2)
   enrolledAt DateTime @default(now())
 
