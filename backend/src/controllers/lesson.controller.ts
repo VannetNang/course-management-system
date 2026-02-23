@@ -13,7 +13,7 @@ export const store = async (
     const { title, description, videoUrl } = req.body;
 
     // Find existing course with courseId
-    const existingCourse = await prisma.course.findFirstOrThrow({
+    const existingCourse = await prisma.course.findUnique({
       where: {
         id: id,
       },
@@ -39,7 +39,7 @@ export const store = async (
 
     res.status(201).json({
       status: 'success',
-      message: 'Uploaded lesson successfully',
+      message: 'Lesson uploaded successfully',
       data: newLesson,
     });
   } catch (error) {
@@ -55,9 +55,38 @@ export const update = async (
   next: NextFunction,
 ) => {
   try {
+    const { id } = req.params as { id: string };
+    const { title, description, videoUrl } = req.body;
+
+    // Find existing lesson with lessonId
+    const existingLesson = await prisma.lesson.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    // If not found
+    if (!existingLesson) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Lesson not found',
+      });
+    }
+
+    // Else, update lesson with new data
+    const updatedLesson = await prisma.lesson.update({
+      where: { id: id },
+      data: {
+        title: title || undefined,
+        description: description || undefined,
+        videoUrl: videoUrl || undefined,
+      },
+    });
+
     res.status(200).json({
       status: 'success',
-      message: 'Updated lesson successfully',
+      message: 'Lesson updated successfully',
+      data: updatedLesson,
     });
   } catch (error) {
     next(error);
