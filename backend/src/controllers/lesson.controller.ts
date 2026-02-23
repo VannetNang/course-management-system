@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { prisma } from '../config/db';
 
 // @desc    create new lessons   (ADMIN ONLY)
 // @Route   POST   /api/lessons
@@ -8,9 +9,37 @@ export const store = async (
   next: NextFunction,
 ) => {
   try {
+    const { courseId, title, description, videoUrl } = req.body;
+
+    // Find existing course with courseId
+    const existingCourse = await prisma.course.findFirstOrThrow({
+      where: {
+        id: courseId,
+      },
+    });
+
+    // If not found
+    if (!existingCourse) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Cannot add lesson: Course not found',
+      });
+    }
+
+    // Else, create new lesson
+    const newLesson = await prisma.lesson.create({
+      data: {
+        courseId: courseId,
+        title,
+        description,
+        videoUrl,
+      },
+    });
+
     res.status(201).json({
       status: 'success',
       message: 'Uploaded lesson successfully',
+      data: newLesson,
     });
   } catch (error) {
     next(error);
