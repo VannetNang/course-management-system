@@ -2,19 +2,20 @@ import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db';
 
 // @desc    create new lessons   (ADMIN ONLY)
-// @Route   POST   /api/lessons
+// @Route   POST   /api/lessons/:id
 export const store = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const { courseId, title, description, videoUrl } = req.body;
+    const { id } = req.params as { id: string };
+    const { title, description, videoUrl } = req.body;
 
     // Find existing course with courseId
     const existingCourse = await prisma.course.findFirstOrThrow({
       where: {
-        id: courseId,
+        id: id,
       },
     });
 
@@ -29,7 +30,7 @@ export const store = async (
     // Else, create new lesson
     const newLesson = await prisma.lesson.create({
       data: {
-        courseId: courseId,
+        courseId: id,
         title,
         description,
         videoUrl,
