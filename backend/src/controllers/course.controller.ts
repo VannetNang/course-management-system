@@ -17,7 +17,7 @@ export const index = async (
 
     res.status(200).json({
       status: 'success',
-      message: 'Retrieved courses successfully',
+      message: 'Courses retrieved successfully',
       data: courses,
     });
   } catch (error) {
@@ -40,7 +40,7 @@ export const show = async (req: Request, res: Response, next: NextFunction) => {
 
     res.status(200).json({
       status: 'success',
-      message: 'Retrieved course successfully',
+      message: 'Course retrieved successfully',
       data: course,
     });
   } catch (error) {
@@ -86,7 +86,7 @@ export const store = async (
 
     res.status(201).json({
       status: 'success',
-      message: 'Uploaded course successfully',
+      message: 'Course uploaded successfully',
       data: newCourse,
     });
   } catch (error) {
@@ -139,7 +139,7 @@ export const update = async (
 
     res.status(200).json({
       status: 'success',
-      message: 'Updated course successfully',
+      message: 'Course updated successfully',
       data: updatedCourse,
     });
   } catch (error) {
@@ -194,7 +194,7 @@ export const destroy = async (
 
     res.status(200).json({
       status: 'success',
-      message: 'Deleted course successfully',
+      message: 'Course deleted successfully',
     });
   } catch (error) {
     next(error);

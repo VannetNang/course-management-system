@@ -101,9 +101,29 @@ export const destroy = async (
   next: NextFunction,
 ) => {
   try {
+    const { id } = req.params as { id: string };
+
+    // Find existing lesson with lessonId
+    const existingLesson = await prisma.lesson.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    // If not found
+    if (!existingLesson) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Lesson not found',
+      });
+    }
+
+    // Else, delete that lesson
+    await prisma.lesson.delete({ where: { id: id } });
+
     res.status(200).json({
       status: 'success',
-      message: 'Deleted lesson successfully',
+      message: 'Lesson deleted successfully',
     });
   } catch (error) {
     next(error);
