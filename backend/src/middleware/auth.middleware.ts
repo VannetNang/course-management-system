@@ -3,7 +3,7 @@ import { prisma } from '../config/db';
 import config from '../config/config';
 import jwt from 'jsonwebtoken';
 
-interface RequestWithUser extends Request {
+export interface RequestWithUser extends Request {
   user?: any;
 }
 

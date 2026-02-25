@@ -1,5 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db';
+import { COUNTRY, CURRENCY, KHQR, TAG } from 'ts-khqr';
+import config from '../config/config';
+import { RequestWithUser } from '../middleware/auth.middleware';
+import { verifyBakongTransaction } from '../utils/verifyBakongTransaction';
 
 // @desc    show course's price summary   (PUBLIC)
 // @Route   GET   /api/enrolments/summary/:id
@@ -56,16 +60,60 @@ export const getSummary = async (
 };
 
 // @desc    show QR CODE   (AUTH ONLY)
-// @Route   GET   /api/enrolments/checkout
+// @Route   GET   /api/enrolments/checkout/:id
 export const createTransaction = async (
-  req: Request,
+  req: RequestWithUser,
   res: Response,
   next: NextFunction,
 ) => {
   try {
+    const { id } = req.params as { id: string };
+
+    // Find existing course
+    const course = await prisma.course.findUnique({
+      where: { id: id },
+    });
+
+    // If not found
+    if (!course) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Course not found',
+      });
+    }
+
+    // Else, create transaction
+    const result = KHQR.generate({
+      tag: TAG.INDIVIDUAL,
+      accountID: config.bakong_account_id,
+      merchantName: config.bakong_merchant_name,
+      merchantCity: config.bakong_merchant_city,
+      currency: CURRENCY.KHR,
+      amount: Number(course.price),
+      countryCode: COUNTRY.KH,
+      expirationTimestamp: Date.now() + 1 * 60 * 1000, // 1 minute
+      additionalData: {
+        storeLabel: config.bakong_store_label,
+        terminalLabel: config.bakong_terminal_label,
+      },
+    });
+
+    await prisma.enrolment.create({
+      data: {
+        userId: req.user.id,
+        courseId: course.id,
+        priceAtSale: Number(course.price),
+        progress: 0,
+      },
+    });
+
     res.status(200).json({
       status: 'success',
-      message: 'Course summary retrieved successfully',
+      message: 'Transaction created and QR generated',
+      data: {
+        qr: result.data?.qr,
+        md5: result.data?.md5,
+      },
     });
   } catch (error) {
     next(error);
@@ -80,9 +128,43 @@ export const modifyTransaction = async (
   next: NextFunction,
 ) => {
   try {
+    const { md5, enrolmentId } = req.body;
+
+    // Check existing enrolment
+    const enrolment = await prisma.enrolment.findUnique({
+      where: { id: enrolmentId },
+    });
+
+    // If not found
+    if (!enrolment) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Enrolment not found',
+      });
+    }
+
+    // Else, check the transaction
+    const result = await verifyBakongTransaction(md5);
+
+    // If not success
+    if (result.data.responseCode !== 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Payment failed! Transaction not yet received',
+      });
+    }
+
+    // If success -> update the status
+    await prisma.enrolment.update({
+      where: { id: enrolmentId },
+      data: {
+        status: 'success',
+      },
+    });
+
     res.status(200).json({
       status: 'success',
-      message: 'Course summary retrieved successfully',
+      message: 'Payment verified successfully',
     });
   } catch (error) {
     next(error);

@@ -13,7 +13,7 @@ const enrolmentRouter = Router();
 enrolmentRouter.get('/summary/:id', getSummary);
 
 // Generate KHQR QR CODE + Auth Only
-enrolmentRouter.get('/checkout', userAuthorize, createTransaction);
+enrolmentRouter.get('/checkout/:id', userAuthorize, createTransaction);
 
 // Modify the transaction + Auth Only
 enrolmentRouter.post('/checkout', userAuthorize, modifyTransaction);
