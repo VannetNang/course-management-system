@@ -5,6 +5,7 @@ import { adminOnly } from '../middleware/role.middleware';
 import { validateRequest } from '../middleware/validation.middleware';
 import {
   createLessonSchema,
+  lessonParamSchema,
   updateLessonSchema,
 } from '../schemas/lesson.schema';
 
@@ -29,6 +30,12 @@ lessonRouter.put(
 );
 
 // Delete specific lesson + Admin only
-lessonRouter.delete('/:id', userAuthorize, adminOnly, destroy);
+lessonRouter.delete(
+  '/:id',
+  userAuthorize,
+  adminOnly,
+  validateRequest(lessonParamSchema),
+  destroy,
+);
 
 export default lessonRouter;

@@ -18,3 +18,9 @@ export const updateLessonSchema = z.object({
     videoUrl: z.string().url('Please provide a valid video link').optional(),
   }),
 });
+
+export const lessonParamSchema = z.object({
+  params: z.object({
+    id: z.string().uuid('Invalid Lesson ID'),
+  }),
+});
