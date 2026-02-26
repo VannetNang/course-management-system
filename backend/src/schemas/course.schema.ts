@@ -62,3 +62,9 @@ export const updateCourseSchema = z.object({
     discountQuantity: z.coerce.number().int().min(0).optional(),
   }),
 });
+
+export const courseParamSchema = z.object({
+  params: z.object({
+    id: z.string().uuid('Invalid Course ID'),
+  }),
+});
