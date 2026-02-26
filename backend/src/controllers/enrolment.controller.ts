@@ -106,7 +106,7 @@ export const createTransaction = async (
       data: {
         userId: req.user.id,
         courseId: course.id,
-        priceAtSale: Number(course.price),
+        priceAtSale: finalAmount,
         progress: 0,
       },
     });

@@ -6,6 +6,11 @@ import {
   modifyTransaction,
 } from '../controllers/enrolment.controller';
 import { userAuthorize } from '../middleware/auth.middleware';
+import { validateRequest } from '../middleware/validation.middleware';
+import {
+  createTransactionSchema,
+  modifyTransactionSchema,
+} from '../schemas/enrolment.schema';
 
 const enrolmentRouter = Router();
 
@@ -13,10 +18,20 @@ const enrolmentRouter = Router();
 enrolmentRouter.get('/summary/:id', getSummary);
 
 // Generate KHQR QR CODE + Auth Only
-enrolmentRouter.get('/checkout/:id', userAuthorize, createTransaction);
+enrolmentRouter.get(
+  '/checkout/:id',
+  userAuthorize,
+  validateRequest(createTransactionSchema),
+  createTransaction,
+);
 
 // Modify the transaction + Auth Only
-enrolmentRouter.post('/checkout', userAuthorize, modifyTransaction);
+enrolmentRouter.post(
+  '/checkout',
+  userAuthorize,
+  validateRequest(modifyTransactionSchema),
+  modifyTransaction,
+);
 
 // Cancel the transaction + Auth Only
 enrolmentRouter.patch('/checkout/:id', userAuthorize, cancelTransaction);
