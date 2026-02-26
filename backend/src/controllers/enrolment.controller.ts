@@ -98,7 +98,7 @@ export const createTransaction = async (
       },
     });
 
-    await prisma.enrolment.create({
+    const enrolment = await prisma.enrolment.create({
       data: {
         userId: req.user.id,
         courseId: course.id,
@@ -111,6 +111,7 @@ export const createTransaction = async (
       status: 'success',
       message: 'Transaction created and QR generated',
       data: {
+        enrolmentId: enrolment.id,
         qr: result.data?.qr,
         md5: result.data?.md5,
       },
@@ -172,16 +173,38 @@ export const modifyTransaction = async (
 };
 
 // @desc    cancel the transaction   (AUTH ONLY)
-// @Route   DELETE   /api/enrolments/checkout/:id
+// @Route   PATCH   /api/enrolments/checkout/:id
 export const cancelTransaction = async (
-  req: Request,
+  req: RequestWithUser,
   res: Response,
   next: NextFunction,
 ) => {
   try {
+    const userId = req.user.id;
+    const enrolmentId = req.params.id as string;
+
+    // Find existing enrolment
+    const enrolment = await prisma.enrolment.findFirst({
+      where: { id: enrolmentId, userId: userId },
+    });
+
+    // If not found
+    if (!enrolment) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Transaction not found',
+      });
+    }
+
+    // Else, update the status to 'cancelled'
+    await prisma.enrolment.update({
+      where: { id: enrolmentId, userId: userId },
+      data: { status: 'cancelled' },
+    });
+
     res.status(200).json({
       status: 'success',
-      message: 'Enrolment cancelled successfully',
+      message: 'Payment cancelled successfully',
     });
   } catch (error) {
     next(error);

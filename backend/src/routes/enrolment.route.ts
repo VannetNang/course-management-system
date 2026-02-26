@@ -19,6 +19,6 @@ enrolmentRouter.get('/checkout/:id', userAuthorize, createTransaction);
 enrolmentRouter.post('/checkout', userAuthorize, modifyTransaction);
 
 // Cancel the transaction + Auth Only
-enrolmentRouter.delete('/checkout/:id', userAuthorize, cancelTransaction);
+enrolmentRouter.patch('/checkout/:id', userAuthorize, cancelTransaction);
 
 export default enrolmentRouter;
