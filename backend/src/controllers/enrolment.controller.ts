@@ -1,9 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
-import { prisma } from '../config/db';
-import { COUNTRY, CURRENCY, KHQR, TAG } from 'ts-khqr';
-import config from '../config/config';
-import { RequestWithUser } from '../middleware/auth.middleware';
 import { verifyBakongTransaction } from '../utils/verifyBakongTransaction';
+import { RequestWithUser } from '../middleware/auth.middleware';
+import { Request, Response, NextFunction } from 'express';
+import { COUNTRY, CURRENCY, KHQR, TAG } from 'ts-khqr';
+import { prisma } from '../config/db';
+import config from '../config/config';
 
 // @desc    show course's price summary   (PUBLIC)
 // @Route   GET   /api/enrolments/summary/:id
@@ -82,14 +82,18 @@ export const createTransaction = async (
       });
     }
 
-    // Else, create transaction
+    // Else, apply discount logic first if that course has discount
+    const discount = course.discountQuantity > 0 ? Number(course.discount) : 0;
+    const finalAmount = Math.round(Number(course.price) * (1 - discount / 100));
+
+    // Then, create transaction
     const result = KHQR.generate({
       tag: TAG.INDIVIDUAL,
       accountID: config.bakong_account_id,
       merchantName: config.bakong_merchant_name,
       merchantCity: config.bakong_merchant_city,
       currency: CURRENCY.KHR,
-      amount: Number(course.price),
+      amount: finalAmount,
       countryCode: COUNTRY.KH,
       expirationTimestamp: Date.now() + 1 * 60 * 1000, // 1 minute
       additionalData: {
@@ -144,6 +148,14 @@ export const modifyTransaction = async (
       });
     }
 
+    // If already success, don't run the logic again
+    if (enrolment.status === 'success') {
+      return res.status(200).json({
+        status: 'success',
+        message: 'Payment already verified',
+      });
+    }
+
     // Else, check the transaction
     const result = await verifyBakongTransaction(md5);
 
@@ -155,12 +167,29 @@ export const modifyTransaction = async (
       });
     }
 
-    // If success -> update the status
-    await prisma.enrolment.update({
-      where: { id: enrolmentId },
-      data: {
-        status: 'success',
-      },
+    // If success -> update the status and discount quantity
+    // Use transaction to ensure the payment doesn't go wrong
+    await prisma.$transaction(async (tx) => {
+      // Update enrolment status
+      await tx.enrolment.update({
+        where: { id: enrolmentId },
+        data: { status: 'success' },
+      });
+
+      // Then, handle Discount Inventory
+      // We only decrement if the course has a discount available
+      const course = await tx.course.findUnique({
+        where: { id: enrolment.courseId },
+      });
+
+      if (course && course.discountQuantity > 0) {
+        await tx.course.update({
+          where: { id: enrolment.courseId },
+          data: {
+            discountQuantity: { decrement: 1 },
+          },
+        });
+      }
     });
 
     res.status(200).json({
