@@ -7,6 +7,8 @@ export const createTransactionSchema = z.object({
 });
 
 export const modifyTransactionSchema = z.object({
-  enrolmentId: z.string().uuid('Invalid Enrolment ID'),
-  md5: z.string().min(1, 'md5 is required'),
+  body: z.object({
+    enrolmentId: z.string().uuid('Invalid Enrolment ID'),
+    md5: z.string().min(1, 'md5 is required'),
+  }),
 });
