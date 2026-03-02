@@ -13,6 +13,7 @@ export const getSummary = async (
   next: NextFunction,
 ) => {
   try {
+    // course id
     const { id } = req.params as { id: string };
 
     // Find existing course with id
@@ -67,6 +68,7 @@ export const createTransaction = async (
   next: NextFunction,
 ) => {
   try {
+    // course id
     const { id } = req.params as { id: string };
 
     // Find existing course
@@ -106,7 +108,7 @@ export const createTransaction = async (
       data: {
         userId: req.user.id,
         courseId: course.id,
-        priceAtSale: Number(course.price),
+        priceAtSale: finalAmount,
         progress: 0,
       },
     });
@@ -210,7 +212,7 @@ export const cancelTransaction = async (
 ) => {
   try {
     const userId = req.user.id;
-    const enrolmentId = req.params.id as string;
+    const { id: enrolmentId } = req.params as { id: string };
 
     // Find existing enrolment
     const enrolment = await prisma.enrolment.findFirst({

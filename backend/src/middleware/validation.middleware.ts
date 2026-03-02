@@ -2,7 +2,10 @@ import { NextFunction, Request, Response } from 'express';
 
 export const validateRequest = (schema: any) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const validated = schema.safeParse(req.body);
+    const validated = schema.safeParse({
+      body: req.body,
+      params: req.params,
+    });
 
     if (!validated.success) {
       const fieldErrors = validated.error.flatten().fieldErrors;

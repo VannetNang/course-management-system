@@ -11,6 +11,7 @@ import { adminOnly } from '../middleware/role.middleware';
 import { upload } from '../config/cloudinary';
 import { validateRequest } from '../middleware/validation.middleware';
 import {
+  courseParamSchema,
   createCourseSchema,
   updateCourseSchema,
 } from '../schemas/course.schema';
@@ -21,7 +22,7 @@ const courseRouter = Router();
 courseRouter.get('/', index);
 
 // Get specific course + Public
-courseRouter.get('/:id', show);
+courseRouter.get('/:id', validateRequest(courseParamSchema), show);
 
 // Create new course + Admin only
 courseRouter.post(
@@ -44,6 +45,12 @@ courseRouter.put(
 );
 
 // Delete specific course + Admin only
-courseRouter.delete('/:id', userAuthorize, adminOnly, destroy);
+courseRouter.delete(
+  '/:id',
+  userAuthorize,
+  adminOnly,
+  validateRequest(courseParamSchema),
+  destroy,
+);
 
 export default courseRouter;

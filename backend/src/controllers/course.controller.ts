@@ -29,11 +29,12 @@ export const index = async (
 // @Route   GET   /api/courses/:id
 export const show = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
+    // course id
+    const { id } = req.params as { id: string };
 
-    const course = await prisma.course.findFirstOrThrow({
+    const course = await prisma.course.findUnique({
       where: {
-        id: id as string,
+        id: id,
       },
       include: { lessons: true },
     });
@@ -117,8 +118,7 @@ export const update = async (
     }
 
     // then, extract data
-    const { title, description, price, discount, discountQuantity, lessons } =
-      req.body;
+    const { title, description, price, discount, discountQuantity } = req.body;
 
     // if no file, keep the old one
     const thumbnail = req.file?.path;
@@ -155,6 +155,7 @@ export const destroy = async (
   next: NextFunction,
 ) => {
   try {
+    // course id
     const { id } = req.params as { id: string };
 
     // find existing course

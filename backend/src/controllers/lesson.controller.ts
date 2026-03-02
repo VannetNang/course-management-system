@@ -101,6 +101,7 @@ export const destroy = async (
   next: NextFunction,
 ) => {
   try {
+    // lesson id
     const { id } = req.params as { id: string };
 
     // Find existing lesson with lessonId
