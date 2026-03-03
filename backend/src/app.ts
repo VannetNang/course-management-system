@@ -28,8 +28,8 @@ app.get('/', (req: Request, res: Response) => {
 // Routes
 app.use('/api/auth', authRouter);
 app.use('/api/courses', courseRouter);
-app.use('/api/lessons', lessonRouter);
 app.use('/api/lessons/progress', progressRouter);
+app.use('/api/lessons', lessonRouter);
 app.use('/api/enrolments', enrolmentRouter);
 
 // Global error handler (should be after routes)
