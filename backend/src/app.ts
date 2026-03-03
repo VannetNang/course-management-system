@@ -7,6 +7,7 @@ import authRouter from './routes/auth.route';
 import courseRouter from './routes/course.route';
 import lessonRouter from './routes/lesson.route';
 import enrolmentRouter from './routes/enrolment.route';
+import progressRouter from './routes/progress.route';
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.get('/', (req: Request, res: Response) => {
 // Routes
 app.use('/api/auth', authRouter);
 app.use('/api/courses', courseRouter);
+app.use('/api/lessons/progress', progressRouter);
 app.use('/api/lessons', lessonRouter);
 app.use('/api/enrolments', enrolmentRouter);
 
