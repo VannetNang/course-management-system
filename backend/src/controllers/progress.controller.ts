@@ -28,7 +28,7 @@ export const store = async (
     }
 
     // Check if lesson is in that course
-    const lesson = await prisma.lesson.findUnique({
+    const lesson = await prisma.lesson.findFirst({
       where: {
         id: lessonId,
         courseId: courseId,
