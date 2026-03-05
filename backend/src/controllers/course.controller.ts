@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db';
 import { cloudinary } from '../config/cloudinary';
+import { redis, redisCache } from '../utils/redisCache';
 
 // @desc    get all courses   (PUBLIC)
 // @Route   GET   /api/courses
@@ -10,10 +11,15 @@ export const index = async (
   next: NextFunction,
 ) => {
   try {
-    const courses = await prisma.course.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: { lessons: true },
-    });
+    // Implement Redis Caching
+    const courses = await redisCache(
+      'courses:all',
+      async () =>
+        await prisma.course.findMany({
+          orderBy: { createdAt: 'desc' },
+          include: { lessons: true },
+        }),
+    );
 
     res.status(200).json({
       status: 'success',
@@ -32,12 +38,17 @@ export const show = async (req: Request, res: Response, next: NextFunction) => {
     // course id
     const { id } = req.params as { id: string };
 
-    const course = await prisma.course.findUnique({
-      where: {
-        id: id,
-      },
-      include: { lessons: true },
-    });
+    // Implement Redis Caching
+    const course = await redisCache(
+      `courses:${id}`,
+      async () =>
+        await prisma.course.findUnique({
+          where: {
+            id: id,
+          },
+          include: { lessons: true },
+        }),
+    );
 
     res.status(200).json({
       status: 'success',
@@ -84,6 +95,9 @@ export const store = async (
         lessons: true,
       },
     });
+
+    // Then, delete Redis Caching due to New Data
+    await redis.del('courses:all');
 
     res.status(201).json({
       status: 'success',
@@ -136,6 +150,10 @@ export const update = async (
         thumbnail: thumbnail || undefined,
       },
     });
+
+    // Then, update Redis Caching
+    await redis.del('courses:all');
+    await redis.del(`courses:${id}`);
 
     res.status(200).json({
       status: 'success',
@@ -192,6 +210,10 @@ export const destroy = async (
         id: id,
       },
     });
+
+    // Then, update Redis Caching
+    await redis.del('courses:all');
+    await redis.del(`courses:${id}`);
 
     res.status(200).json({
       status: 'success',

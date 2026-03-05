@@ -17,6 +17,7 @@ interface Config {
   bakong_merchant_city: string;
   bakong_store_label: string;
   bakong_terminal_label: string;
+  redis_expiration: number;
 }
 
 const config: Config = {
@@ -34,6 +35,7 @@ const config: Config = {
   bakong_merchant_city: process.env.BAKONG_MERCHANT_CITY || '',
   bakong_store_label: process.env.BAKONG_STORE_LABEL || '',
   bakong_terminal_label: process.env.BAKONG_TERMINAL_LABEL || '',
+  redis_expiration: Number(process.env.REDIS_EXPIRATION) || 6000,
 };
 
 export default config;
