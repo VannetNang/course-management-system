@@ -1,7 +1,7 @@
 import { createClient } from 'redis';
 import config from '../config/config';
 
-const redis = createClient();
+export const redis = createClient();
 
 // Error message
 redis.on('error', (err) => console.log('Redis Client Error', err));
