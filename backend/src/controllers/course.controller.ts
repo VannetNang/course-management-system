@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db';
 import { cloudinary } from '../config/cloudinary';
+import { redisCache } from '../utils/redisCache';
 
 // @desc    get all courses   (PUBLIC)
 // @Route   GET   /api/courses
@@ -10,10 +11,19 @@ export const index = async (
   next: NextFunction,
 ) => {
   try {
-    const courses = await prisma.course.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: { lessons: true },
-    });
+    // const courses = await prisma.course.findMany({
+    //   orderBy: { createdAt: 'desc' },
+    //   include: { lessons: true },
+    // });
+
+    const courses = await redisCache(
+      'courses',
+      async () =>
+        await prisma.course.findMany({
+          orderBy: { createdAt: 'desc' },
+          include: { lessons: true },
+        }),
+    );
 
     res.status(200).json({
       status: 'success',
