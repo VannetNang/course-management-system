@@ -69,11 +69,12 @@ export const createTransaction = async (
 ) => {
   try {
     // course id
-    const { id } = req.params as { id: string };
+    const { id: courseId } = req.params as { id: string };
+    const userId = req.user.id;
 
     // Find existing course
     const course = await prisma.course.findUnique({
-      where: { id: id },
+      where: { id: courseId },
     });
 
     // If not found
@@ -104,11 +105,19 @@ export const createTransaction = async (
       },
     });
 
-    const enrolment = await prisma.enrolment.create({
-      data: {
-        userId: req.user.id,
-        courseId: course.id,
+    const enrolment = await prisma.enrolment.upsert({
+      where: {
+        userId_courseId: { userId, courseId },
+      },
+      update: {
+        status: 'pending',
         priceAtSale: finalAmount,
+      },
+      create: {
+        userId,
+        courseId,
+        priceAtSale: finalAmount,
+        status: 'pending',
         progress: 0,
       },
     });

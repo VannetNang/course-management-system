@@ -10,6 +10,7 @@ import enrolmentRouter from './routes/enrolment.route';
 import progressRouter from './routes/progress.route';
 import { RequestWithUser, userAuthorize } from './middleware/auth.middleware';
 import analyticsRouter from './routes/admin/analytics.route';
+import salesRouter from './routes/admin/sales.route';
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use('/api/lessons/progress', progressRouter);
 app.use('/api/lessons', lessonRouter);
 app.use('/api/enrolments', enrolmentRouter);
 app.use('/api/analytics', analyticsRouter);
+app.use('/api/sales', salesRouter);
 
 // Global error handler (should be after routes)
 app.use(errorMiddleware);

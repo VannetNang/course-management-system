@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db';
 import { redisCache } from '../utils/redisCache';
 
-// @desc    get all courses   (PUBLIC)
+// @desc    get stats analytics (Total Revenue, Total Course Purchased)   (ADMIN ONLY)
 // @Route   GET   /api/analytics/stats
 export const getStats = async (
   req: Request,
@@ -28,7 +28,7 @@ export const getStats = async (
 
         return {
           totalIncome: revenue._sum.priceAtSale || 0,
-          totalEnrollments: courses,
+          totalEnrolments: courses,
         };
       },
       1800, // 30-minute cache

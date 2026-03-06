@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import { getStats } from '../../controllers/analytics.controller';
+import { getSales } from '../../controllers/sales.controller';
 import { userAuthorize } from '../../middleware/auth.middleware';
 import { adminOnly } from '../../middleware/role.middleware';
 
-const analyticsRouter = Router();
+const salesRouter = Router();
 
 // View all courses revenue income + ADMIN ONLY
-analyticsRouter.get('/stats', userAuthorize, adminOnly, getStats);
+salesRouter.get('/', userAuthorize, adminOnly, getSales);
 
-export default analyticsRouter;
+export default salesRouter;
