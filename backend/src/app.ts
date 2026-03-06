@@ -8,6 +8,7 @@ import courseRouter from './routes/course.route';
 import lessonRouter from './routes/lesson.route';
 import enrolmentRouter from './routes/enrolment.route';
 import progressRouter from './routes/progress.route';
+import { RequestWithUser, userAuthorize } from './middleware/auth.middleware';
 
 const app = express();
 
@@ -23,6 +24,15 @@ app.use(cookieParser());
 // Default route
 app.get('/', (req: Request, res: Response) => {
   res.json({ message: 'Welcome to CMS Backend API!' });
+});
+
+// Get User Info route
+app.get('/api/user', userAuthorize, (req: RequestWithUser, res: Response) => {
+  return res.status(200).json({
+    status: 'success',
+    message: 'User info retrieved successfully',
+    data: req.user,
+  });
 });
 
 // Routes

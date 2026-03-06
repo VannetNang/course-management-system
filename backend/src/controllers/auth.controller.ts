@@ -2,29 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 import { prisma } from '../config/db';
 import bcrypt from 'bcrypt';
 import { generateToken } from '../utils/generateToken';
-import { RequestWithUser } from '../middleware/auth.middleware';
-
-// @desc    get specific user's account
-// @Route   GET   /api/auth/user
-export const getUser = async (
-  req: RequestWithUser,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    // Get User
-    const { password, ...userWithoutPassword } = req.user;
-
-    // Return response
-    res.status(200).json({
-      status: 'success',
-      message: 'User retrieved successfully',
-      data: userWithoutPassword,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
 // @desc    create account
 // @Route   POST   /api/auth/register
