@@ -11,6 +11,8 @@ import progressRouter from './routes/progress.route';
 import { RequestWithUser, userAuthorize } from './middleware/auth.middleware';
 import analyticsRouter from './routes/admin/analytics.route';
 import salesRouter from './routes/admin/sales.route';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger';
 
 const app = express();
 
@@ -22,6 +24,9 @@ connectToCloudinary();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Swagger Docs
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Default route
 app.get('/', (req: Request, res: Response) => {
