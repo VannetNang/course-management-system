@@ -45,7 +45,7 @@ export const getSalesSummary = async (
           };
         });
       },
-      21600, // 6 hours in seconds
+      3600, // in seconds = 1 hour 
     );
 
     res.status(200).json({

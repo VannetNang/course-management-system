@@ -31,13 +31,55 @@ export const getStats = async (
           totalEnrolments: courses,
         };
       },
-      1800, // 30-minute cache
+      3600, // 60-minute cache
     );
 
     res.status(200).json({
       status: 'success',
       message: 'Stats retrieved successfully',
       data: stats,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    get the top 3 best=selling courses   (ADMIN ONLY)
+// @Route   GET   /api/analytics/best-selling
+export const getBestSelling = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    // Implement Redis Caching
+    const bestSelling = await redisCache(
+      'analytics:best-selling',
+      async () => {
+        const topCourses = await prisma.enrolment.groupBy({
+          by: ['courseId'],
+          where: { status: 'success' },
+          _count: { id: true },
+          orderBy: {
+            _count: { id: 'desc' }, // Sort by most enrollments
+          },
+          take: 3, // Only get the top 3
+        });
+
+        const courseDetails = await prisma.course.findMany({
+          where: { id: { in: topCourses.map((c) => c.courseId) } },
+          select: { title: true, thumbnail: true },
+        });
+
+        return courseDetails;
+      },
+      3600,
+    );
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Top 3 best-selling courses retrieved successfully',
+      data: bestSelling,
     });
   } catch (error) {
     next(error);

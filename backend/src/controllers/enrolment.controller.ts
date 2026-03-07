@@ -98,7 +98,7 @@ export const createTransaction = async (
       currency: CURRENCY.KHR,
       amount: finalAmount,
       countryCode: COUNTRY.KH,
-      expirationTimestamp: Date.now() + 1 * 60 * 1000, // 1 minute
+      expirationTimestamp: Date.now() + 2 * 60 * 1000, // 2 minutes = 120s
       additionalData: {
         storeLabel: config.bakong_store_label,
         terminalLabel: config.bakong_terminal_label,
