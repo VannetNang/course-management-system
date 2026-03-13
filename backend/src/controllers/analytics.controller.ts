@@ -4,6 +4,46 @@ import { redisCache } from '../utils/redisCache';
 
 // @desc    get stats analytics (Total Revenue, Total Course Purchased)   (ADMIN ONLY)
 // @Route   GET   /api/analytics/stats
+/**
+ * @swagger
+ * /api/analytics/stats:
+ *   get:
+ *     summary: Get overall revenue and enrolment stats (Admin Only)
+ *     description: Returns the total platform income and total number of successful course purchases. Results are cached for 1 hour.
+ *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       "200":
+ *         description: Stats retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Stats retrieved successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalIncome:
+ *                       type: number
+ *                       description: Total revenue generated across all courses in USD
+ *                       example: 4299.75
+ *                     totalEnrolments:
+ *                       type: integer
+ *                       description: Total number of successful course purchases across the platform
+ *                       example: 215
+ *       "401":
+ *         $ref: '#/components/responses/401'
+ *       "403":
+ *         $ref: '#/components/responses/403'
+ */
+
 export const getStats = async (
   req: Request,
   res: Response,
@@ -44,8 +84,48 @@ export const getStats = async (
   }
 };
 
-// @desc    get the top 3 best=selling courses   (ADMIN ONLY)
+
+// @desc    get the top 3 best-selling courses   (ADMIN ONLY)
 // @Route   GET   /api/analytics/best-selling
+/**
+ * @swagger
+ * /api/analytics/best-selling:
+ *   get:
+ *     summary: Get the top 3 best-selling courses (Admin Only)
+ *     description: Returns the top 3 courses ranked by number of successful enrolments. Results are cached for 1 hour.
+ *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       "200":
+ *         description: Top 3 best-selling courses retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Top 3 best-selling courses retrieved successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       title:
+ *                         type: string
+ *                         example: Full-Stack Web Development Bootcamp
+ *                       thumbnail:
+ *                         type: string
+ *                         example: uploads/thumbnail.png
+ *       "401":
+ *         $ref: '#/components/responses/401'
+ *       "403":
+ *         $ref: '#/components/responses/403'
+ */
 export const getBestSelling = async (
   req: Request,
   res: Response,
