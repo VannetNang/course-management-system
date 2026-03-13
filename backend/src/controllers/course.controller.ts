@@ -5,6 +5,20 @@ import { redis, redisCache } from '../utils/redisCache';
 
 // @desc    get all courses   (PUBLIC)
 // @Route   GET   /api/courses
+/**
+ * @swagger
+ *   /api/courses:
+ *     get:
+ *       summary: Get all courses
+ *       tags: [Courses]
+ *       responses:
+ *         "200":
+ *           description: The list of courses
+ *           contents:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Course'
+ */
 export const index = async (
   req: Request,
   res: Response,
@@ -33,22 +47,53 @@ export const index = async (
 
 // @desc    get specific courses   (PUBLIC)
 // @Route   GET   /api/courses/:id
+/**
+ * @swagger
+ *   /api/courses/{id}:
+ *     get:
+ *       summary: Get a course by ID
+ *       tags: [Courses]
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           schema:
+ *             type: string
+ *           required: true
+ *           description: Input the course ID
+ *       responses:
+ *         "200":
+ *           description: Course retrieved successfully
+ *           contents:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Course'
+ *         "404":
+ *           $ref: '#/components/responses/404'
+ */
 export const show = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // course id
     const { id } = req.params as { id: string };
 
-    // Implement Redis Caching
+    // Else, implement Redis Caching
     const course = await redisCache(
       `courses:${id}`,
-      async () =>
-        await prisma.course.findUnique({
+      async () => {
+        return await prisma.course.findUnique({
           where: {
             id: id,
           },
           include: { lessons: true },
-        }),
+        });
+      },
+      3600,
     );
+
+    if (!course) {
+      return res
+        .status(404)
+        .json({ status: 'error', message: 'Course not found' });
+    }
 
     res.status(200).json({
       status: 'success',
@@ -62,6 +107,32 @@ export const show = async (req: Request, res: Response, next: NextFunction) => {
 
 // @desc    create new courses   (ADMIN ONLY)
 // @Route   POST   /api/courses
+/**
+ * @swagger
+ *   /api/courses:
+ *     post:
+ *       summary: Create a course  (Admin Only)
+ *       tags: [Courses]
+ *       security:
+ *         - bearerAuth: []
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           multipart/form-data:
+ *             schema:
+ *               $ref: '#/components/schemas/Course'
+ *       responses:
+ *         "400":
+ *           $ref: '#/components/responses/400'
+ *         "401":
+ *           $ref: '#/components/responses/401'
+ *         "403":
+ *           $ref: '#/components/responses/403'
+ *         "201":
+ *           description: Course uploaded successfully
+ *           contents:
+ *             application/json
+ */
 export const store = async (
   req: Request,
   res: Response,
@@ -111,6 +182,75 @@ export const store = async (
 
 // @desc    update specific courses   (ADMIN ONLY)
 // @Route   PUT   /api/courses/:id
+/**
+ * @swagger
+ *   /api/courses/{id}:
+ *     put:
+ *       summary: Update a course (Admin Only)
+ *       description: Partially update a course's details. All fields are optional — only the fields provided will be updated. If no new thumbnail is uploaded, the existing one is preserved.
+ *       tags: [Courses]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           schema:
+ *             type: string
+ *           required: true
+ *           description: The unique ID of the course to update
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           multipart/form-data:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 title:
+ *                   type: string
+ *                   description: Updated course title (optional — keeps existing if omitted)
+ *                 description:
+ *                   type: string
+ *                   description: Updated course description (optional — keeps existing if omitted)
+ *                 price:
+ *                   type: number
+ *                   format: float
+ *                   description: Updated course price in USD (optional — keeps existing if omitted)
+ *                 thumbnail:
+ *                   type: string
+ *                   format: binary
+ *                   description: Updated course thumbnail image (optional — keeps existing if omitted)
+ *                 discount:
+ *                   type: number
+ *                   format: float
+ *                   description: Updated discounted price (optional)
+ *                 discountQuantity:
+ *                   type: integer
+ *                   description: Updated number of seats eligible for the discount (optional)
+ *       responses:
+ *         "200":
+ *           description: Course updated successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   message:
+ *                     type: string
+ *                     example: Course updated successfully
+ *                   data:
+ *                     $ref: '#/components/schemas/Course'
+ *         "400":
+ *           $ref: '#/components/responses/400'
+ *         "401":
+ *           $ref: '#/components/responses/401'
+ *         "403":
+ *           $ref: '#/components/responses/403'
+ *         "404":
+ *           $ref: '#/components/responses/404'
+ */
 export const update = async (
   req: Request,
   res: Response,
@@ -142,7 +282,7 @@ export const update = async (
       data: {
         title: title || undefined, // If title is empty, Prisma won't touch the current title
         description: description || undefined,
-        price: price ? parseFloat(price) : undefined,
+        price: price !== undefined ? parseFloat(price) : undefined,
         discount: discount ? parseFloat(discount) : undefined,
         discountQuantity: discountQuantity
           ? parseInt(discountQuantity)
@@ -167,6 +307,35 @@ export const update = async (
 
 // @desc    delete courses   (ADMIN ONLY)
 // @Route   DELETE   /api/courses/:id
+/**
+ * @swagger
+ *   /api/courses/{id}:
+ *     delete:
+ *       summary: Delete a course  (Admin Only)
+ *       tags: [Courses]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           schema:
+ *             type: string
+ *           required: true
+ *           description: Input the course ID
+ *       responses:
+ *         "400":
+ *           $ref: '#/components/responses/400'
+ *         "401":
+ *           $ref: '#/components/responses/401'
+ *         "403":
+ *           $ref: '#/components/responses/403'
+ *         "404":
+ *           $ref: '#/components/responses/404'
+ *         "200":
+ *           description: Course deleted successfully
+ *           contents:
+ *             application/json
+ */
 export const destroy = async (
   req: Request,
   res: Response,

@@ -1,15 +1,5 @@
 import * as z from 'zod';
 
-const lessonItemSchema = z.array(
-  z.object({
-    body: z.object({
-      title: z.string().min(3, 'Course title must be at least 3 characters'),
-      description: z.string().optional(),
-      videoUrl: z.string().url('Please provide a valid video link'),
-    }),
-  }),
-);
-
 export const createCourseSchema = z.object({
   body: z.object({
     title: z.string().min(3, 'Course title must be at least 3 characters'),
@@ -26,15 +16,17 @@ export const createCourseSchema = z.object({
 
     lessons: z.preprocess(
       (val) => {
-        if (typeof val === 'string') {
-          try {
-            return JSON.parse(val);
-          } catch (error) {
-            return [];
-          }
-        }
+        return typeof val === 'string' ? JSON.parse(val) : val;
       },
-      lessonItemSchema.min(1, 'A course must have at least one lesson'),
+      z
+        .array(
+          z.object({
+            title: z.string(),
+            description: z.string().optional(),
+            videoUrl: z.string().url(),
+          }),
+        )
+        .min(1),
     ),
   }),
 });
