@@ -7,6 +7,58 @@ import config from '../config/config';
 
 // @desc    show course's price summary   (PUBLIC)
 // @Route   GET   /api/enrolments/summary/:id
+/**
+ * @swagger
+ * /api/enrolments/summary/{id}:
+ *   get:
+ *     summary: Get course price summary
+ *     description: Returns a price breakdown for a course including any applicable discounts. This endpoint is public and does not require authentication.
+ *     tags: [Enrolments]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The unique ID of the course
+ *     responses:
+ *       "200":
+ *         description: Course summary retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Course summary retrieved successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     title:
+ *                       type: string
+ *                       example: Full-Stack Web Development Bootcamp
+ *                     originalPrice:
+ *                       type: number
+ *                       example: 19.99
+ *                     appliedDiscount:
+ *                       type: string
+ *                       example: 20%
+ *                     discountSavings:
+ *                       type: string
+ *                       example: '4.00'
+ *                     totalPrice:
+ *                       type: string
+ *                       example: '15.99'
+ *                     inventoryStatus:
+ *                       type: string
+ *                       example: Discount available (5 left)
+ *       "404":
+ *         $ref: '#/components/responses/404'
+ */
 export const getSummary = async (
   req: Request,
   res: Response,
@@ -62,6 +114,55 @@ export const getSummary = async (
 
 // @desc    show QR CODE   (AUTH ONLY)
 // @Route   GET   /api/enrolments/checkout/:id
+/**
+ * @swagger
+ * /api/enrolments/checkout/{id}:
+ *   get:
+ *     summary: Generate a KHQR payment QR code for a course (Auth Only)
+ *     description: Creates or resets a pending enrolment and returns a KHQR code for the user to scan and pay. The QR code expires in 2 minutes.
+ *     tags: [Enrolments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The unique ID of the course to enrol in
+ *     responses:
+ *       "200":
+ *         description: Transaction created and QR generated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Transaction created and QR generated
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     enrolmentId:
+ *                       type: string
+ *                       example: clx123abc
+ *                     qr:
+ *                       type: string
+ *                       description: The KHQR string to render as a QR code
+ *                       example: 00020101021229...
+ *                     md5:
+ *                       type: string
+ *                       description: MD5 hash used to verify the transaction status
+ *                       example: a1b2c3d4e5f6...
+ *       "401":
+ *         $ref: '#/components/responses/401'
+ *       "404":
+ *         $ref: '#/components/responses/404'
+ */
 export const createTransaction = async (
   req: RequestWithUser,
   res: Response,
@@ -136,8 +237,78 @@ export const createTransaction = async (
   }
 };
 
-// @desc    modify the payment transaction from user   (AUTH ONLY)
+// @desc    verify the payment transaction   (AUTH ONLY)
 // @Route   POST   /api/enrolments/checkout
+/**
+ * @swagger
+ * /api/enrolments/checkout:
+ *   post:
+ *     summary: Verify a KHQR payment transaction (Auth Only)
+ *     description: Verifies the payment using the MD5 hash from the QR code. On success, the enrolment status is updated and any applicable discount inventory is decremented.
+ *     tags: [Enrolments]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - md5
+ *               - enrolmentId
+ *             properties:
+ *               md5:
+ *                 type: string
+ *                 description: The MD5 hash returned from the QR generation step
+ *                 example: a1b2c3d4e5f6...
+ *               enrolmentId:
+ *                 type: string
+ *                 description: The enrolment ID returned from the QR generation step
+ *                 example: clx123abc
+ *     responses:
+ *       "200":
+ *         description: Payment verified successfully (or already verified)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Payment verified successfully
+ *       "400":
+ *         description: Payment failed — transaction not yet received
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: 'Payment failed! Transaction not yet received'
+ *       "401":
+ *         $ref: '#/components/responses/401'
+ *       "404":
+ *         description: Enrolment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: Enrolment not found
+ */
 export const modifyTransaction = async (
   req: Request,
   res: Response,
@@ -214,6 +385,52 @@ export const modifyTransaction = async (
 
 // @desc    cancel the transaction   (AUTH ONLY)
 // @Route   PATCH   /api/enrolments/checkout/:id
+/**
+ * @swagger
+ * /api/enrolments/checkout/{id}:
+ *   patch:
+ *     summary: Cancel a pending transaction (Auth Only)
+ *     description: Cancels a pending enrolment transaction by its ID. Users can only cancel their own transactions.
+ *     tags: [Enrolments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The unique ID of the enrolment to cancel
+ *     responses:
+ *       "200":
+ *         description: Payment cancelled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Payment cancelled successfully
+ *       "401":
+ *         $ref: '#/components/responses/401'
+ *       "404":
+ *         description: Transaction not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: Transaction not found
+ */
 export const cancelTransaction = async (
   req: RequestWithUser,
   res: Response,
