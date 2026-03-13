@@ -5,6 +5,87 @@ import { generateToken } from '../utils/generateToken';
 
 // @desc    create account
 // @Route   POST   /api/auth/register
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Register a new user account
+ *     description: Creates a new user account and returns a JWT token on success. The token is also set as an `httpOnly` cookie automatically.
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The user's display name
+ *                 example: Super Boing
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The user's email address (must be unique)
+ *                 example: boing@example.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: The user's password
+ *                 example: secret123
+ *     responses:
+ *       "201":
+ *         description: User created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: User created successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           example: clx123abc
+ *                         name:
+ *                           type: string
+ *                           example: Super Boing
+ *                         email:
+ *                           type: string
+ *                           example: boing@example.com
+ *                         role:
+ *                           type: string
+ *                           example: user
+ *                     token:
+ *                       type: string
+ *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *       "400":
+ *         description: User already exists with this email
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: User already exists with this email
+ */
 export const register = async (
   req: Request,
   res: Response,
@@ -65,6 +146,82 @@ export const register = async (
 
 // @desc    login account
 // @Route   POST   /api/auth/login
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Log in to an existing account
+ *     description: Authenticates a user with email and password. Returns a JWT token on success, also set as an `httpOnly` cookie.
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The user's registered email address
+ *                 example: boing@example.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: The user's password
+ *                 example: secret123
+ *     responses:
+ *       "200":
+ *         description: Logged in successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Logged in successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           example: clx123abc
+ *                         name:
+ *                           type: string
+ *                           example: Super Boing
+ *                         email:
+ *                           type: string
+ *                           example: boing@example.com
+ *                         role:
+ *                           type: string
+ *                           example: user
+ *                     token:
+ *                       type: string
+ *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *       "401":
+ *         description: Incorrect credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: Incorrect credential information
+ */
 export const login = async (
   req: Request,
   res: Response,
@@ -111,8 +268,34 @@ export const login = async (
   }
 };
 
-// @desc    login account
+// @desc    logout account
 // @Route   POST   /api/auth/logout
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Log out the current user
+ *     description: Clears the JWT `httpOnly` cookie, effectively logging the user out. No request body is needed.
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       "200":
+ *         description: Logged out successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Logged out successfully
+ *       "401":
+ *         $ref: '#/components/responses/401'
+ */
 export const logout = async (
   req: Request,
   res: Response,
