@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { destroy, store, update } from '../controllers/lesson.controller';
 import { userAuthorize } from '../middleware/auth.middleware';
 import { adminOnly } from '../middleware/role.middleware';
-import { validateRequest } from '../middleware/validation.middleware';
+import { validateBody } from '../middleware/validation.middleware';
 import {
   createLessonSchema,
   lessonParamSchema,
@@ -16,7 +16,7 @@ lessonRouter.post(
   '/:id',
   userAuthorize,
   adminOnly,
-  validateRequest(createLessonSchema),
+  validateBody(createLessonSchema),
   store,
 );
 
@@ -25,7 +25,7 @@ lessonRouter.put(
   '/:id',
   userAuthorize,
   adminOnly,
-  validateRequest(updateLessonSchema),
+  validateBody(updateLessonSchema),
   update,
 );
 
@@ -34,7 +34,7 @@ lessonRouter.delete(
   '/:id',
   userAuthorize,
   adminOnly,
-  validateRequest(lessonParamSchema),
+  validateBody(lessonParamSchema),
   destroy,
 );
 

@@ -9,7 +9,10 @@ import {
 import { userAuthorize } from '../middleware/auth.middleware';
 import { adminOnly } from '../middleware/role.middleware';
 import { upload } from '../config/cloudinary';
-import { validateRequest } from '../middleware/validation.middleware';
+import {
+  validateBody,
+  validateParam,
+} from '../middleware/validation.middleware';
 import {
   courseParamSchema,
   createCourseSchema,
@@ -22,7 +25,7 @@ const courseRouter = Router();
 courseRouter.get('/', index);
 
 // Get specific course + Public
-courseRouter.get('/:id', validateRequest(courseParamSchema), show);
+courseRouter.get('/:id', validateParam(courseParamSchema), show);
 
 // Create new course + Admin only
 courseRouter.post(
@@ -30,7 +33,7 @@ courseRouter.post(
   userAuthorize,
   adminOnly,
   upload.single('thumbnail'), // must be exact to the Course Schema
-  validateRequest(createCourseSchema),
+  validateBody(createCourseSchema),
   store,
 );
 
@@ -40,7 +43,7 @@ courseRouter.put(
   userAuthorize,
   adminOnly,
   upload.single('thumbnail'), // must be exact to the Course Schema
-  validateRequest(updateCourseSchema),
+  validateParam(updateCourseSchema),
   update,
 );
 
@@ -49,7 +52,7 @@ courseRouter.delete(
   '/:id',
   userAuthorize,
   adminOnly,
-  validateRequest(courseParamSchema),
+  validateParam(courseParamSchema),
   destroy,
 );
 

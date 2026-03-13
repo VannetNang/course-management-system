@@ -6,7 +6,7 @@ import {
   modifyTransaction,
 } from '../controllers/enrolment.controller';
 import { userAuthorize } from '../middleware/auth.middleware';
-import { validateRequest } from '../middleware/validation.middleware';
+import { validateBody, validateParam } from '../middleware/validation.middleware';
 import {
   courseParamSchema,
   enrolmentParamSchema,
@@ -18,7 +18,7 @@ const enrolmentRouter = Router();
 // Generate course's cost summary + PUBLIC
 enrolmentRouter.get(
   '/summary/:id',
-  validateRequest(courseParamSchema),
+  validateParam(courseParamSchema),
   getSummary,
 );
 
@@ -26,7 +26,7 @@ enrolmentRouter.get(
 enrolmentRouter.get(
   '/checkout/:id',
   userAuthorize,
-  validateRequest(courseParamSchema),
+  validateParam(courseParamSchema),
   createTransaction,
 );
 
@@ -34,7 +34,7 @@ enrolmentRouter.get(
 enrolmentRouter.post(
   '/checkout',
   userAuthorize,
-  validateRequest(modifyTransactionSchema),
+  validateBody(modifyTransactionSchema),
   modifyTransaction,
 );
 
@@ -42,7 +42,7 @@ enrolmentRouter.post(
 enrolmentRouter.patch(
   '/checkout/:id',
   userAuthorize,
-  validateRequest(enrolmentParamSchema),
+  validateParam(enrolmentParamSchema),
   cancelTransaction,
 );
 

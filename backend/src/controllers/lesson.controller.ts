@@ -3,6 +3,62 @@ import { prisma } from '../config/db';
 
 // @desc    create new lessons   (ADMIN ONLY)
 // @Route   POST   /api/lessons/:id
+/**
+ * @swagger
+ * /api/lessons/{id}:
+ *   post:
+ *     summary: Add a new lesson to a course (Admin Only)
+ *     description: Creates a new lesson and associates it with the specified course. The `id` param refers to the course ID.
+ *     tags: [Lessons]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The unique ID of the course to add the lesson to
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Lesson'
+ *     responses:
+ *       "201":
+ *         description: Lesson uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Lesson uploaded successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Lesson'
+ *       "401":
+ *         $ref: '#/components/responses/401'
+ *       "403":
+ *         $ref: '#/components/responses/403'
+ *       "404":
+ *         description: Course not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: 'Cannot add lesson: Course not found'
+ */
 export const store = async (
   req: Request,
   res: Response,
@@ -49,6 +105,62 @@ export const store = async (
 
 // @desc    update specific lesson   (ADMIN ONLY)
 // @Route   PUT   /api/lessons/:id
+/**
+ * @swagger
+ * /api/lessons/{id}:
+ *   put:
+ *     summary: Update a lesson (Admin Only)
+ *     description: Partially update a lesson's details. All fields are optional — only the fields provided will be updated.
+ *     tags: [Lessons]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The unique ID of the lesson to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: Updated lesson title (optional — keeps existing if omitted)
+ *               description:
+ *                 type: string
+ *                 description: Updated lesson description (optional — keeps existing if omitted)
+ *               videoUrl:
+ *                 type: string
+ *                 format: uri
+ *                 description: Updated video URL (optional — keeps existing if omitted)
+ *     responses:
+ *       "200":
+ *         description: Lesson updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Lesson updated successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Lesson'
+ *       "401":
+ *         $ref: '#/components/responses/401'
+ *       "403":
+ *         $ref: '#/components/responses/403'
+ *       "404":
+ *         $ref: '#/components/responses/404'
+ */
 export const update = async (
   req: Request,
   res: Response,
@@ -95,6 +207,43 @@ export const update = async (
 
 // @desc    delete lesson   (ADMIN ONLY)
 // @Route   DELETE   /api/lessons/:id
+/**
+ * @swagger
+ * /api/lessons/{id}:
+ *   delete:
+ *     summary: Delete a lesson (Admin Only)
+ *     description: Permanently deletes a lesson by its ID. This action is irreversible.
+ *     tags: [Lessons]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The unique ID of the lesson to delete
+ *     responses:
+ *       "200":
+ *         description: Lesson deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Lesson deleted successfully
+ *       "401":
+ *         $ref: '#/components/responses/401'
+ *       "403":
+ *         $ref: '#/components/responses/403'
+ *       "404":
+ *         $ref: '#/components/responses/404'
+ */
 export const destroy = async (
   req: Request,
   res: Response,
