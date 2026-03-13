@@ -4,6 +4,72 @@ import { prisma } from '../config/db';
 
 // @desc    create lesson progress tracking for users   (AUTH ONLY)
 // @Route   POST   /api/lessons/progress
+/**
+ * @swagger
+ * /api/lessons/progress:
+ *   post:
+ *     summary: Mark a lesson as completed (Auth Only)
+ *     description: Marks a lesson as completed for the authenticated user and automatically recalculates their overall course progress percentage. The user must have a successful enrolment in the course to access this endpoint.
+ *     tags: [Lessons]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - lessonId
+ *               - courseId
+ *             properties:
+ *               lessonId:
+ *                 type: string
+ *                 description: The unique ID of the lesson to mark as completed
+ *                 example: clx456def
+ *               courseId:
+ *                 type: string
+ *                 description: The unique ID of the course the lesson belongs to
+ *                 example: clx123abc
+ *     responses:
+ *       "200":
+ *         description: Lesson marked as completed and progress updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Marked as completed successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     currentProgress:
+ *                       type: integer
+ *                       description: The user's updated course completion percentage (0–100)
+ *                       example: 75
+ *       "401":
+ *         $ref: '#/components/responses/401'
+ *       "403":
+ *         description: User has not purchased this course
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: 'Forbidden: You have not purchased this course yet'
+ *       "404":
+ *         $ref: '#/components/responses/404'
+ */
 export const store = async (
   req: RequestWithUser,
   res: Response,

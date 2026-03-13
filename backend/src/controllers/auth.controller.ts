@@ -167,12 +167,12 @@ export const register = async (
  *                 type: string
  *                 format: email
  *                 description: The user's registered email address
- *                 example: boing@example.com
+ *                 example: boing@gmail.com
  *               password:
  *                 type: string
  *                 format: password
  *                 description: The user's password
- *                 example: secret123
+ *                 example: abc
  *     responses:
  *       "200":
  *         description: Logged in successfully
