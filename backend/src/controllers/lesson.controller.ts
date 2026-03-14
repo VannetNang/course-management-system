@@ -24,7 +24,25 @@ import { prisma } from '../config/db';
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Lesson'
+ *             type: object
+ *             required:
+ *               - title
+ *               - description
+ *               - videoUrl
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: The title of the lesson
+ *                 example: Introduction to REST APIs
+ *               description:
+ *                 type: string
+ *                 description: A brief overview of what the lesson covers
+ *                 example: Fundamentals of REST API design and best practices.
+ *               videoUrl:
+ *                 type: string
+ *                 format: uri
+ *                 description: A publicly accessible URL pointing to the lesson video
+ *                 example: https://youtube.com/watch?v=example
  *     responses:
  *       "201":
  *         description: Lesson uploaded successfully
@@ -40,7 +58,23 @@ import { prisma } from '../config/db';
  *                   type: string
  *                   example: Lesson uploaded successfully
  *                 data:
- *                   $ref: '#/components/schemas/Lesson'
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: clx456def
+ *                     title:
+ *                       type: string
+ *                       example: Introduction to REST APIs
+ *                     description:
+ *                       type: string
+ *                       example: Fundamentals of REST API design and best practices.
+ *                     videoUrl:
+ *                       type: string
+ *                       example: https://youtube.com/watch?v=example
+ *                     courseId:
+ *                       type: string
+ *                       example: clx123abc
  *       "401":
  *         $ref: '#/components/responses/401'
  *       "403":
@@ -153,7 +187,23 @@ export const store = async (
  *                   type: string
  *                   example: Lesson updated successfully
  *                 data:
- *                   $ref: '#/components/schemas/Lesson'
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: clx456def
+ *                     title:
+ *                       type: string
+ *                       example: Introduction to REST APIs
+ *                     description:
+ *                       type: string
+ *                       example: Fundamentals of REST API design and best practices.
+ *                     videoUrl:
+ *                       type: string
+ *                       example: https://youtube.com/watch?v=example
+ *                     courseId:
+ *                       type: string
+ *                       example: clx123abc
  *       "401":
  *         $ref: '#/components/responses/401'
  *       "403":

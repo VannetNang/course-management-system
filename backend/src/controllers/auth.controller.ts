@@ -11,7 +11,7 @@ import { generateToken } from '../utils/generateToken';
  *   post:
  *     summary: Register a new user account
  *     description: Creates a new user account and returns a JWT token on success. The token is also set as an `httpOnly` cookie automatically.
- *     tags: [Auth]
+ *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
@@ -152,7 +152,7 @@ export const register = async (
  *   post:
  *     summary: Log in to an existing account
  *     description: Authenticates a user with email and password. Returns a JWT token on success, also set as an `httpOnly` cookie.
- *     tags: [Auth]
+ *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
@@ -276,7 +276,7 @@ export const login = async (
  *   post:
  *     summary: Log out the current user
  *     description: Clears the JWT `httpOnly` cookie, effectively logging the user out. No request body is needed.
- *     tags: [Auth]
+ *     tags: [Authentication]
  *     security:
  *       - bearerAuth: []
  *     responses:
