@@ -10,17 +10,24 @@ const s3 = new S3Client({
   },
 });
 
-export const uploadToR2 = async (file: Express.Multer.File, key: string) => {
+export const uploadToR2 = async (file: Express.Multer.File) => {
   try {
+    const fileName = `lessons/${Date.now()}-${file.originalname}`;
+
+    // Send to R2 Bucket
     await s3.send(
       new PutObjectCommand({
         Bucket: config.r2_bucket_name,
-        Key: key,
+        Key: fileName,
         Body: file.buffer,
         ContentType: file.mimetype,
       }),
     );
-    return { success: true, key };
+
+    // Then, generate video url for that file
+    const fileUrl = `${config.r2_public_url}/${fileName}`;
+
+    return { fileUrl };
   } catch (error) {
     console.error('R2 Upload Error:', error);
     throw new Error('Failed to upload video to storage');

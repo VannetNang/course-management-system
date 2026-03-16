@@ -14,6 +14,7 @@ interface Config {
   r2_account_id: string;
   r2_access_key_id: string;
   r2_secret_access_key: string;
+  r2_public_url: string;
   r2_bucket_name: string;
   bakong_token: string;
   bakong_account_id: string;
@@ -36,6 +37,7 @@ const config: Config = {
   r2_account_id: process.env.R2_ACCOUNT_ID || '',
   r2_access_key_id: process.env.R2_ACCESS_KEY_ID || '',
   r2_secret_access_key: process.env.R2_SECRET_ACCESS_KEY || '',
+  r2_public_url: process.env.R2_PUBLIC_URL || '',
   r2_bucket_name: process.env.R2_BUCKET_NAME || '',
   bakong_token: process.env.BAKONG_TOKEN || '',
   bakong_account_id: process.env.BAKONG_ACCOUNT_ID || '',
