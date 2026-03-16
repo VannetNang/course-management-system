@@ -196,7 +196,7 @@ export const createTransaction = async (
       accountID: config.bakong_account_id,
       merchantName: config.bakong_merchant_name,
       merchantCity: config.bakong_merchant_city,
-      currency: CURRENCY.KHR,
+      currency: CURRENCY.USD,
       amount: finalAmount,
       countryCode: COUNTRY.KH,
       expirationTimestamp: Date.now() + 2 * 60 * 1000, // 2 minutes = 120s

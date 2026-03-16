@@ -11,7 +11,7 @@ import config from '../config/config';
  * /api/lessons/{id}:
  *   post:
  *     summary: Add a new lesson to a course (Admin Only)
- *     description: Creates a new lesson and associates it with the specified course. The `id` param refers to the course ID.
+ *     description: Creates a new lesson and uploads the video to Cloudflare R2 storage. The `id` param refers to the course ID.
  *     tags: [Lessons]
  *     security:
  *       - bearerAuth: []
@@ -25,13 +25,13 @@ import config from '../config/config';
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             required:
  *               - title
  *               - description
- *               - videoUrl
+ *               - video
  *             properties:
  *               title:
  *                 type: string
@@ -41,11 +41,10 @@ import config from '../config/config';
  *                 type: string
  *                 description: A brief overview of what the lesson covers
  *                 example: Fundamentals of REST API design and best practices.
- *               videoUrl:
+ *               video:
  *                 type: string
- *                 format: uri
- *                 description: A publicly accessible URL pointing to the lesson video
- *                 example: https://youtube.com/watch?v=example
+ *                 format: binary
+ *                 description: The video file to upload to Cloudflare R2
  *     responses:
  *       "201":
  *         description: Lesson uploaded successfully
@@ -74,10 +73,23 @@ import config from '../config/config';
  *                       example: Fundamentals of REST API design and best practices.
  *                     videoUrl:
  *                       type: string
- *                       example: https://youtube.com/watch?v=example
+ *                       example: https://pub-xxx.r2.dev/lessons/video.mp4
  *                     courseId:
  *                       type: string
  *                       example: clx123abc
+ *       "400":
+ *         description: No video file attached
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 message:
+ *                   type: string
+ *                   example: Please attach a video file for this lesson.
  *       "401":
  *         $ref: '#/components/responses/401'
  *       "403":
@@ -159,7 +171,7 @@ export const store = async (
  * /api/lessons/{id}:
  *   put:
  *     summary: Update a lesson (Admin Only)
- *     description: Partially update a lesson's details. All fields are optional — only the fields provided will be updated.
+ *     description: Partially updates a lesson. If a new video file is uploaded, it replaces the old one in Cloudflare R2 and the old file is deleted. All fields are optional — only provided fields will be updated.
  *     tags: [Lessons]
  *     security:
  *       - bearerAuth: []
@@ -173,7 +185,7 @@ export const store = async (
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -183,10 +195,10 @@ export const store = async (
  *               description:
  *                 type: string
  *                 description: Updated lesson description (optional — keeps existing if omitted)
- *               videoUrl:
+ *               video:
  *                 type: string
- *                 format: uri
- *                 description: Updated video URL (optional — keeps existing if omitted)
+ *                 format: binary
+ *                 description: New video file to replace the existing one in R2 (optional — keeps existing if omitted)
  *     responses:
  *       "200":
  *         description: Lesson updated successfully
@@ -215,7 +227,7 @@ export const store = async (
  *                       example: Fundamentals of REST API design and best practices.
  *                     videoUrl:
  *                       type: string
- *                       example: https://youtube.com/watch?v=example
+ *                       example: https://pub-xxx.r2.dev/lessons/video.mp4
  *                     courseId:
  *                       type: string
  *                       example: clx123abc
@@ -303,7 +315,7 @@ export const update = async (
  * /api/lessons/{id}:
  *   delete:
  *     summary: Delete a lesson (Admin Only)
- *     description: Permanently deletes a lesson by its ID. This action is irreversible.
+ *     description: Permanently deletes a lesson and its associated video from Cloudflare R2 storage. This action is irreversible.
  *     tags: [Lessons]
  *     security:
  *       - bearerAuth: []

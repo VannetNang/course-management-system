@@ -70,7 +70,7 @@ import { redis, redisCache } from '../utils/redisCache';
  *                               example: Fundamentals of REST API design.
  *                             videoUrl:
  *                               type: string
- *                               example: https://youtube.com/watch?v=example
+ *                               example: https://superboingboing.dev/lessons/2026-04-09.mp4
  */
 export const index = async (
   req: Request,
@@ -170,7 +170,7 @@ export const index = async (
  *                             example: Fundamentals of REST API design.
  *                           videoUrl:
  *                             type: string
- *                             example: https://youtube.com/watch?v=example
+ *                             example: https://superboingboing.dev/lessons/2026-04-09.mp4
  *       "404":
  *         $ref: '#/components/responses/404'
  */
@@ -216,7 +216,7 @@ export const show = async (req: Request, res: Response, next: NextFunction) => {
  * /api/courses:
  *   post:
  *     summary: Create a new course (Admin Only)
- *     description: Creates a new course with lessons. Lessons must be passed as a JSON stringified array in the `lessons` field since the request uses multipart/form-data.
+ *     description: Creates a new course with a thumbnail image. Lessons are added separately via POST /api/lessons/:courseId after the course is created
  *     tags: [Courses]
  *     security:
  *       - bearerAuth: []
@@ -245,27 +245,23 @@ export const show = async (req: Request, res: Response, next: NextFunction) => {
  *                 format: float
  *                 minimum: 0.01
  *                 description: The full price of the course in USD (minimum $0.01)
- *                 example: 19.99
+ *                 example: 0.01
  *               thumbnail:
  *                 type: string
  *                 format: binary
  *                 description: The course thumbnail image
- *               lessons:
- *                 type: string
- *                 description: 'A JSON stringified array of lessons e.g: [{"title":"...","description":"...","videoUrl":"..."}]'
- *                 example: '[{"title":"Intro to REST","description":"REST basics","videoUrl":"https://youtube.com/watch?v=example"}]'
  *               discount:
  *                 type: number
  *                 format: float
  *                 minimum: 0.01
  *                 nullable: true
  *                 description: An optional discounted price (minimum $0.01)
- *                 example: 14.99
+ *                 example: 0
  *               discountQuantity:
  *                 type: integer
  *                 nullable: true
  *                 description: Number of seats eligible for the discounted price
- *                 example: 50
+ *                 example: 0
  *     responses:
  *       "201":
  *         description: Course uploaded successfully
@@ -317,9 +313,6 @@ export const store = async (
         thumbnail: thumbnail as string,
         discount: parseFloat(discount || '0'),
         discountQuantity: parseInt(discountQuantity || '0'),
-      },
-      include: {
-        lessons: true,
       },
     });
 
