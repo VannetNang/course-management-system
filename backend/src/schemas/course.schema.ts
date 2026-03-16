@@ -12,21 +12,6 @@ export const createCourseSchema = z.object({
 
   discount: z.coerce.number().min(0).default(0),
   discountQuantity: z.coerce.number().int().min(0).default(0),
-
-  lessons: z.preprocess(
-    (val) => {
-      return typeof val === 'string' ? JSON.parse(val) : val;
-    },
-    z
-      .array(
-        z.object({
-          title: z.string(),
-          description: z.string().optional(),
-          videoUrl: z.string().url(),
-        }),
-      )
-      .min(1),
-  ),
 });
 
 export const updateCourseSchema = z.object({

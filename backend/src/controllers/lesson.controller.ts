@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db';
+import { s3, uploadToR2 } from '../config/r2';
+import { DeleteObjectCommand } from '@aws-sdk/client-s3';
+import config from '../config/config';
 
 // @desc    create new lessons   (ADMIN ONLY)
 // @Route   POST   /api/lessons/:id
@@ -100,7 +103,7 @@ export const store = async (
 ) => {
   try {
     const { id } = req.params as { id: string };
-    const { title, description, videoUrl } = req.body;
+    const { title, description } = req.body;
 
     // Find existing course with courseId
     const existingCourse = await prisma.course.findUnique({
@@ -117,7 +120,19 @@ export const store = async (
       });
     }
 
-    // Else, create new lesson
+    // Else, check if video file exists
+    if (!req.file) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Please attach a video file for this lesson.',
+      });
+    }
+
+    // Then, upload to R2 Storage
+    const result = await uploadToR2(req.file);
+    const videoUrl = result.fileUrl;
+
+    // Finally, create new lesson
     const newLesson = await prisma.lesson.create({
       data: {
         courseId: id,
@@ -218,13 +233,11 @@ export const update = async (
 ) => {
   try {
     const { id } = req.params as { id: string };
-    const { title, description, videoUrl } = req.body;
+    const { title, description } = req.body;
 
     // Find existing lesson with lessonId
     const existingLesson = await prisma.lesson.findUnique({
-      where: {
-        id: id,
-      },
+      where: { id },
     });
 
     // If not found
@@ -235,13 +248,41 @@ export const update = async (
       });
     }
 
-    // Else, update lesson with new data
+    // Old video file
+    let videoUrl = existingLesson.videoUrl;
+
+    // Else, update lesson with new data if file exists
+    if (req.file) {
+      // Upload new file
+      const { fileUrl } = await uploadToR2(req.file);
+      videoUrl = fileUrl;
+
+      // Delete old file from R2 Storage
+      if (existingLesson.videoUrl) {
+        try {
+          const oldKey = decodeURIComponent(
+            existingLesson.videoUrl.replace(`${config.r2_public_url}/`, ''),
+          );
+
+          await s3.send(
+            new DeleteObjectCommand({
+              Bucket: config.r2_bucket_name,
+              Key: oldKey,
+            }),
+          );
+        } catch (err) {
+          console.error('Failed to delete old file:', err);
+        }
+      }
+    }
+
+    // Finally, update DB with whatever we have (new URL or old URL)
     const updatedLesson = await prisma.lesson.update({
-      where: { id: id },
+      where: { id },
       data: {
-        title: title || undefined,
-        description: description || undefined,
-        videoUrl: videoUrl || undefined,
+        title: title ?? existingLesson.title,
+        description: description ?? existingLesson.description,
+        videoUrl: videoUrl,
       },
     });
 
@@ -320,6 +361,24 @@ export const destroy = async (
 
     // Else, delete that lesson
     await prisma.lesson.delete({ where: { id: id } });
+
+    // Also, delete the video
+    if (existingLesson.videoUrl) {
+      try {
+        const oldKey = decodeURIComponent(
+          existingLesson.videoUrl.replace(`${config.r2_public_url}/`, ''),
+        );
+
+        await s3.send(
+          new DeleteObjectCommand({
+            Bucket: config.r2_bucket_name,
+            Key: oldKey,
+          }),
+        );
+      } catch (err) {
+        console.error('Failed to delete old file:', err);
+      }
+    }
 
     res.status(200).json({
       status: 'success',

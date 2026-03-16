@@ -292,20 +292,6 @@ export const show = async (req: Request, res: Response, next: NextFunction) => {
  *                     price:
  *                       type: number
  *                       example: 19.99
- *                     lessons:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           id:
- *                             type: string
- *                             example: clx456def
- *                           title:
- *                             type: string
- *                             example: Intro to REST
- *                           videoUrl:
- *                             type: string
- *                             example: https://youtube.com/watch?v=example
  *       "400":
  *         $ref: '#/components/responses/400'
  *       "401":
@@ -319,15 +305,8 @@ export const store = async (
   next: NextFunction,
 ) => {
   try {
-    const { title, description, price, discount, discountQuantity, lessons } =
-      req.body;
+    const { title, description, price, discount, discountQuantity } = req.body;
     const thumbnail = req.file?.path;
-
-    // Convert from stringify / text lessons back to array using Parse()
-    let parsedLessons = [];
-    if (lessons) {
-      parsedLessons = JSON.parse(lessons);
-    }
 
     // Create new course
     const newCourse = await prisma.course.create({
@@ -338,9 +317,6 @@ export const store = async (
         thumbnail: thumbnail as string,
         discount: parseFloat(discount || '0'),
         discountQuantity: parseInt(discountQuantity || '0'),
-        lessons: {
-          create: parsedLessons,
-        },
       },
       include: {
         lessons: true,

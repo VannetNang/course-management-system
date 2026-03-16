@@ -1,7 +1,7 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import config from './config';
 
-const s3 = new S3Client({
+export const s3 = new S3Client({
   region: 'auto',
   endpoint: `https://${config.r2_account_id}.r2.cloudflarestorage.com`,
   credentials: {

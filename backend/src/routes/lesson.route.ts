@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { destroy, store, update } from '../controllers/lesson.controller';
+import { validateBody } from '../middleware/validation.middleware';
 import { userAuthorize } from '../middleware/auth.middleware';
 import { adminOnly } from '../middleware/role.middleware';
-import { validateBody } from '../middleware/validation.middleware';
+import { upload } from '../middleware/multer.middleware';
 import {
   createLessonSchema,
   lessonParamSchema,
@@ -16,6 +17,7 @@ lessonRouter.post(
   '/:id',
   userAuthorize,
   adminOnly,
+  upload.single('video'),
   validateBody(createLessonSchema),
   store,
 );
@@ -25,6 +27,7 @@ lessonRouter.put(
   '/:id',
   userAuthorize,
   adminOnly,
+  upload.single('video'),
   validateBody(updateLessonSchema),
   update,
 );
