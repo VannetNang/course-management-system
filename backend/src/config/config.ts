@@ -11,6 +11,10 @@ interface Config {
   cloudinary_name: string;
   cloudinary_key: string;
   cloudinary_secret: string;
+  r2_account_id: string;
+  r2_access_key_id: string;
+  r2_secret_access_key: string;
+  r2_bucket_name: string;
   bakong_token: string;
   bakong_account_id: string;
   bakong_merchant_name: string;
@@ -29,6 +33,10 @@ const config: Config = {
   cloudinary_name: process.env.CLOUDINARY_NAME || '',
   cloudinary_key: process.env.CLOUDINARY_API_KEY || '',
   cloudinary_secret: process.env.CLOUDINARY_API_SECRET || '',
+  r2_account_id: process.env.R2_ACCOUNT_ID || '',
+  r2_access_key_id: process.env.R2_ACCESS_KEY_ID || '',
+  r2_secret_access_key: process.env.R2_SECRET_ACCESS_KEY || '',
+  r2_bucket_name: process.env.R2_BUCKET_NAME || '',
   bakong_token: process.env.BAKONG_TOKEN || '',
   bakong_account_id: process.env.BAKONG_ACCOUNT_ID || '',
   bakong_merchant_name: process.env.BAKONG_MERCHANT_NAME || '',
