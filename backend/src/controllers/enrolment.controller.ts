@@ -467,3 +467,30 @@ export const cancelTransaction = async (
     next(error);
   }
 };
+
+// @desc    get the purchased courses history   (AUTH ONLY)
+// @Route   GET   /api/enrolments/my-courses
+export const getPurchasedCourses = async (
+  req: RequestWithUser,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = req.user.id;
+
+    const enrolments = await prisma.enrolment.findMany({
+      where: { userId, status: 'success' },
+      include: {
+        course: true,
+      },
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Purchased course retrieved successfully',
+      data: enrolments,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

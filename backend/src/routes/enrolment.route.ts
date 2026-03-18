@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   cancelTransaction,
   createTransaction,
+  getPurchasedCourses,
   getSummary,
   modifyTransaction,
 } from '../controllers/enrolment.controller';
@@ -44,6 +45,13 @@ enrolmentRouter.patch(
   userAuthorize,
   validateParam(enrolmentParamSchema),
   cancelTransaction,
+);
+
+// Get the purchased courses history + Auth Only
+enrolmentRouter.get(
+  '/my-courses',
+  userAuthorize,
+  getPurchasedCourses,
 );
 
 export default enrolmentRouter;
