@@ -133,12 +133,12 @@ export const store = async (
     }
 
     // Else, check if video file exists
-    if (!req.file) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Please attach a video file for this lesson.',
-      });
-    }
+    // if (!req.file) {
+    //   return res.status(400).json({
+    //     status: 'error',
+    //     message: 'Please attach a video file for this lesson.',
+    //   });
+    // }
 
     // Then, upload to R2 Storage
     const result = await uploadToR2(req.file);
