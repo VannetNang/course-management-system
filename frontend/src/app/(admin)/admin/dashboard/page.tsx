@@ -152,7 +152,7 @@ export default function DashboardPage() {
                 />
                 <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
                 <Tooltip
-                  formatter={(value: number) => [value, 'Students']}
+                  formatter={(value: any) => [value, 'Students']}
                 />
                 <Bar dataKey="students" radius={[4, 4, 0, 0]}>
                   {chartData.map((_, index) => (
