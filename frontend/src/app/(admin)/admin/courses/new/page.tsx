@@ -25,7 +25,7 @@ type CreateCourseInput = z.infer<typeof createCourseSchema>;
 export default function NewCoursePage() {
   const router = useRouter();
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<CreateCourseInput>({
-    resolver: zodResolver(createCourseSchema),
+    resolver: zodResolver(createCourseSchema) as any,
     defaultValues: {
       discount: 0,
       discountQuantity: 0,

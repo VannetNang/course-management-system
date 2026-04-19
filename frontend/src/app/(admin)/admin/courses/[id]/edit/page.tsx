@@ -43,7 +43,7 @@ export default function EditCoursePage() {
   const [showLessonForm, setShowLessonForm] = useState(false);
 
   const courseForm = useForm<EditCourseInput>({ resolver: zodResolver(editCourseSchema) as any });
-  const lessonForm = useForm<LessonInput>({ resolver: zodResolver(lessonSchema) });
+  const lessonForm = useForm<LessonInput>({ resolver: zodResolver(lessonSchema) as any });
 
   useEffect(() => {
     getCourse(id)
