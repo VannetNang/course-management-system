@@ -5,16 +5,17 @@ import { useParams, useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { getCourse, Course, Lesson } from '@/lib/courses';
+import { getCourse, Course } from '@/lib/courses';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Trash2, Plus, Loader2 } from 'lucide-react';
-import api from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Trash2, Plus, Loader2, ExternalLink } from 'lucide-react';
+import Image from 'next/image';
+import api from '@/lib/api';
 
 const editCourseSchema = z.object({
   title: z.string().min(3).optional(),
@@ -33,6 +34,10 @@ const lessonSchema = z.object({
 
 type EditCourseInput = z.infer<typeof editCourseSchema>;
 type LessonInput = z.infer<typeof lessonSchema>;
+
+function isValidUrl(url: string) {
+  return url?.startsWith('http://') || url?.startsWith('https://');
+}
 
 export default function EditCoursePage() {
   const { id } = useParams<{ id: string }>();
@@ -118,19 +123,17 @@ export default function EditCoursePage() {
   };
 
   if (loading) return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-2xl space-y-6">
       <Skeleton className="h-8 w-48" />
-      <div className="space-y-4">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="space-y-2">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-        ))}
-      </div>
-      <Skeleton className="h-10 w-32" />
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="space-y-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      ))}
     </div>
   );
+
   if (!course) return <div className="text-center text-muted-foreground">Course not found.</div>;
 
   return (
@@ -170,10 +173,22 @@ export default function EditCoursePage() {
                 <Input type="number" {...courseForm.register('discountQuantity')} />
               </div>
             </div>
-            <div className="space-y-1">
+
+            {/* Thumbnail preview + upload */}
+            <div className="space-y-2">
               <Label>Thumbnail</Label>
+              {isValidUrl(course.thumbnail) && (
+                <div className="relative w-full h-40 rounded-lg overflow-hidden bg-muted mb-2">
+                  <Image src={course.thumbnail} alt="Current thumbnail" fill className="object-cover" />
+                  <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                    Current thumbnail
+                  </div>
+                </div>
+              )}
               <Input type="file" accept="image/*" {...courseForm.register('thumbnail')} />
+              <p className="text-xs text-muted-foreground">Upload a new image to replace the current one</p>
             </div>
+
             <div className="flex gap-3">
               <Button type="submit" disabled={courseForm.formState.isSubmitting}>
                 {courseForm.formState.isSubmitting ? 'Saving...' : 'Save Changes'}
@@ -212,9 +227,10 @@ export default function EditCoursePage() {
                   <Label>Description (optional)</Label>
                   <Input {...lessonForm.register('description')} />
                 </div>
-                <div className="space-y-1">
-                  <Label>Video</Label>
+                <div className="space-y-2">
+                  <Label>Video (optional)</Label>
                   <Input type="file" accept="video/*" {...lessonForm.register('video')} />
+                  <p className="text-xs text-muted-foreground">Leave empty to add video later</p>
                 </div>
                 <div className="flex gap-3">
                   <Button type="submit" disabled={addingLesson}>
@@ -234,7 +250,21 @@ export default function EditCoursePage() {
           <div className="space-y-2">
             {course.lessons?.map((lesson, index) => (
               <div key={lesson.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <span className="text-sm font-medium">{index + 1}. {lesson.title}</span>
+                <div className="space-y-1">
+                  <span className="text-sm font-medium">{index + 1}. {lesson.title}</span>
+                  {isValidUrl(lesson.videoUrl) && (
+                    <div>
+                      
+                        href={lesson.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-blue-500 hover:underline flex items-center gap-1"
+                      >
+                        <ExternalLink className="w-3 h-3" /> View current video
+                      </a>
+                    </div>
+                  )}
+                </div>
                 <Button variant="destructive" size="sm" onClick={() => deleteLesson(lesson.id)}>
                   <Trash2 className="w-3 h-3" />
                 </Button>
