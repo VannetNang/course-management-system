@@ -112,7 +112,7 @@ export default function DashboardPage() {
                 />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip
-                  formatter={(value: number, name: string) => [
+                  formatter={(value: any, name: any) => [
                     name === 'revenue' ? `$${value.toFixed(2)}` : value,
                     name === 'revenue' ? 'Revenue' : 'Students'
                   ]}
