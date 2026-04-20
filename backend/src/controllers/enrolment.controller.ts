@@ -188,10 +188,10 @@ export const createTransaction = async (
 
     // Else, apply discount logic first if that course has discount
     const discount = course.discountQuantity > 0 ? Number(course.discount) : 0;
-    const finalAmount = Math.round(Number(course.price) * (1 - discount / 100));
+    const finalAmount = Math.round(Number(course.price) * (1 - discount / 100) * 100) / 100;
 
     // If free course, auto-enrol immediately
-    if (finalAmount === 0) {
+    if (finalAmount < 0.01) {
       const enrolment = await prisma.enrolment.upsert({
         where: { userId_courseId: { userId, courseId } },
         update: { status: 'success', priceAtSale: 0 },
