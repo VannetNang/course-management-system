@@ -56,17 +56,22 @@ export default function CheckoutPage() {
     const interval = setInterval(async () => {
       try {
         const res = await api.post('/enrolments/checkout', { enrolmentId: eid, md5 });
-        const paymentStatus = res.data.data?.status;
+        console.log(res);
+        
+        const paymentStatus = res.data.status;
         if (paymentStatus === 'success') {
           clearInterval(interval);
           setStatus('success');
           toast.success('Payment successful! Redirecting...');
           setTimeout(() => router.push('/my-courses'), 2000);
-        } else if (paymentStatus === 'cancelled') {
+        } else if (paymentStatus === 'error' && res.data.message?.includes('cancelled')) {
           clearInterval(interval);
           setStatus('cancelled');
         }
-      } catch {}
+      } catch(err) {
+        console.log(err);
+        
+      }
     }, 3000);
     setTimeout(() => clearInterval(interval), 300000);
   };
